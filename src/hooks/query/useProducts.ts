@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createBlog, fetchBlogs } from "@/services/blogs";
 import { Blog, Product } from "@/types/backend/models";
-import { createProduct, fetchProducts, updateProduct } from "@/services/products";
+import { createProduct, fetchProducts, ProductUpdate, updateProduct } from "@/services/products";
 
 export function useProductsQuery() {
     const queryClient = useQueryClient();
@@ -28,17 +28,16 @@ export function useProductsQuery() {
     });
 
     // Update product mutation
-    // const updateMutation = useMutation({
-    //     mutationFn: ({ product, update }: { product: Product; update : any }) => updateProduct(product, ...update),
-    //     onSuccess: (newProduct) => {
-    //         queryClient.setQueryData(["products"], (old: Product[]) => {
+    const updateMutation = useMutation({
+        mutationFn: ({ product, update }: { product: Product; update: ProductUpdate }) => updateProduct(product, update),
+        onSuccess: (updatedProduct) => {
+            queryClient.setQueryData(["products"], (old: Product[]) => {
 
-    //             console.log("update",old);
-                
-    //             return old ? [...old, newProduct] : [newProduct];
-    //         });
-    //     },
-    // });
+             return   old ? old.map((p: Product) => p.productId === updatedProduct.productId ? updatedProduct : p )
+                    : [updatedProduct]
+            });
+        },
+    });
 
 
     // ✅ Delete product mutation
@@ -54,6 +53,6 @@ export function useProductsQuery() {
     return {
         ...productsQuery,
         createMutation,
-        // updateMutation
+        updateMutation 
     };
 }

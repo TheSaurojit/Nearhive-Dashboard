@@ -25,7 +25,7 @@ type ProductCreate = {
 };
 
 
-type ProductUpdate = {
+export type ProductUpdate = {
     name?: string;
     cuisine?: string;
     // productCategory: string;
