@@ -17,7 +17,7 @@ export function useProductsQuery() {
     });
 
     // ✅ Create product  mutation
-    const createMutation = useMutation({
+    const createProductMutation = useMutation({
         mutationFn: createProduct,
         onSuccess: (newProduct) => {
 
@@ -28,7 +28,7 @@ export function useProductsQuery() {
     });
 
     // Update product mutation
-    const updateMutation = useMutation({
+    const updateProductMutation = useMutation({
         mutationFn: ({ product, update }: { product: Product; update: ProductUpdate }) => updateProduct(product, update),
         onSuccess: (updatedProduct) => {
             queryClient.setQueryData(["products"], (old: Product[]) => {
@@ -52,7 +52,7 @@ export function useProductsQuery() {
 
     return {
         ...productsQuery,
-        createMutation,
-        updateMutation 
+        createProductMutation,
+        updateProductMutation 
     };
 }

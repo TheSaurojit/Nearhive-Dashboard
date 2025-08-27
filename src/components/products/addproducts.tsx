@@ -48,7 +48,7 @@ const AddProducts: React.FC = () => {
   const { data: cuisines = [], isLoading: cuisinesLoading } =
     useCuisinesQuery();
 
-  const { createMutation } = useProductsQuery();
+  const { createProductMutation } = useProductsQuery();
 
   const [loading, setLoading] = useState(false);
   const [productImage, setProductImage] = useState<File | null>(null);
@@ -134,7 +134,7 @@ const AddProducts: React.FC = () => {
         };
       }
 
-      await createMutation.mutateAsync({
+      await createProductMutation.mutateAsync({
         name: productName,
         image: productImage,
         cuisine: cuisine.heading, // store the heading of cuisine
