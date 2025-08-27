@@ -1,4 +1,3 @@
-import { fetchBlogs } from "@/services/blogs";
 import { fetchCampaigns } from "@/services/campaings";
 import { fetchCuisines } from "@/services/cuisines";
 import { fetchCustomers } from "@/services/customers";
@@ -46,16 +45,7 @@ export function useUsersQuery() {
 }
 
 
-// Hook for products
-export function useProductsQuery() {
-    return useQuery({
-        queryKey: ["products"],
-        queryFn: fetchProducts ,
-        refetchOnWindowFocus : false ,
-        refetchOnMount : false ,
-        // refetchInterval : 5000
-    });
-}
+
 
 // Hook for customers
 export function useCustomersQuery() {

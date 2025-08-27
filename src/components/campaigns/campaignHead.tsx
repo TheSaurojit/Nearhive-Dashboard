@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/table"
 import { createCampaign } from "@/services/campaings"
 import { Campaign, Product } from "@/types/backend/models"
-import { useCampaignsQuery, useProductsQuery } from "@/hooks/useFiresStoreQueries"
+import { useCampaignsQuery } from "@/hooks/useFiresStoreQueries"
 import { Trash2 } from "lucide-react"
-
+import { useProductsQuery } from "@/hooks/query/useProducts"
 
 type CampaignWithId = Campaign & { id: string }
 

@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useProductsQuery } from "@/hooks/useFiresStoreQueries";
+import { useProductsQuery } from "@/hooks/query/useProducts";
 import { Input } from "@/components/ui/input";
 import {
   Table,

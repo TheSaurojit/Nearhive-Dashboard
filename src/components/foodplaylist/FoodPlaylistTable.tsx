@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useFoodPlaylistQuery, useProductsQuery } from "@/hooks/useFiresStoreQueries";
+import { useFoodPlaylistQuery } from "@/hooks/useFiresStoreQueries";
 import { FoodPlaylist, Product } from "@/types/backend/models";
 import {
   Table,
@@ -28,6 +28,9 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { deleteFoodPlaylist } from "@/services/foodPlaylist"; // ⬅ replace with actual path
+import { useProductsQuery } from "@/hooks/query/useProducts";
+
+
 
 type FoodPlaylistWithId = FoodPlaylist & { id: string };
 

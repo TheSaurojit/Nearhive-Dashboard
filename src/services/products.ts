@@ -108,7 +108,7 @@ export async function updateProduct(product: Product, {
     try {
 
 
-        const updateProduct: Partial<Product> = {
+        const updateProduct: Product = {
             cuisine: cuisine ?? product.cuisine,
             lowerCuisine: cuisine ? toLowerNoSpaces(cuisine) : product.cuisine,
             name: name ?? product.name,
@@ -117,6 +117,8 @@ export async function updateProduct(product: Product, {
             imageUrl: image ? await FirestoreService.uploadFile(image, "Products") : product.imageUrl,
             // variations: variations ?? product.variations,
 
+            //current scenario
+            variations : product.variations ,
 
             createdAt: product.createdAt,
             isAvailable: product.isAvailable,
