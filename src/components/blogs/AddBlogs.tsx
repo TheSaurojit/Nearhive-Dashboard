@@ -126,8 +126,6 @@ const AddBlogs = () => {
             />
           </div>
 
-          <div dangerouslySetInnerHTML={{ __html: content }} />
-
           {/* Content with formatting */}
           {/* <div className="space-y-2 mt-4">
             <Label htmlFor="content">Content</Label>
