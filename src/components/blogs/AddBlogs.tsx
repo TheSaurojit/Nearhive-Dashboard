@@ -18,11 +18,12 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import ImageUploadWithPreview from "@/components/ImageUploadWithPreview";
 import { createBlog } from "@/services/blogs";
 import { useBlogsQuery } from "@/hooks/query/useBlogs";
+import CKEditorComponent from "../CKEditor";
 
 const AddBlogs = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState("ck editor");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [formatting, setFormatting] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,14 +52,12 @@ const AddBlogs = () => {
     setLoading(true);
 
     try {
-
       await createMutation.mutateAsync({
         title,
         description,
         content,
         thumbnail,
       });
-
 
       alert("Blog created successfully!");
 
@@ -119,8 +118,18 @@ const AddBlogs = () => {
             />
           </div>
 
-          {/* Content with formatting */}
           <div className="space-y-2 mt-4">
+            <Label htmlFor="content">CK EDitor</Label>
+            <CKEditorComponent
+              value={content}
+              onChange={(value: string) => setContent(value)}
+            />
+          </div>
+
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+
+          {/* Content with formatting */}
+          {/* <div className="space-y-2 mt-4">
             <Label htmlFor="content">Content</Label>
             <ToggleGroup
               type="multiple"
@@ -146,7 +155,7 @@ const AddBlogs = () => {
               placeholder="Write your blog content here..."
               className="min-h-[150px]"
             />
-          </div>
+          </div> */}
 
           {/* Submit */}
           <div className="mt-4 flex justify-end gap-2">
