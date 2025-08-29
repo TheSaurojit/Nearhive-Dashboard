@@ -18,6 +18,7 @@ import {
 } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import { db, storage } from "@/firebase/firebase-client";
+import imageCompression from "browser-image-compression";
 
 type FirestoreData = Record<string, any>;
 
@@ -99,10 +100,20 @@ export const FirestoreService = {
 
   // 📤 Upload a file and get its download URL
   uploadFile: async (file: File, path: string): Promise<string> => {
+
+     const options = {
+      maxSizeMB: 1, // Max size (1MB)
+      maxWidthOrHeight: 1920, // Resize
+      useWebWorker: true,
+    };
+
+     const compressedFile = await imageCompression(file, options);
+
+
     const filename = `${Date.now()}_${file.name}`;
     const storageRef = ref(storage, `${path}/${filename}`);
 
-    const snapshot = await uploadBytes(storageRef, file);
+    const snapshot = await uploadBytes(storageRef, compressedFile);
     return await getDownloadURL(snapshot.ref);
   },
 };
