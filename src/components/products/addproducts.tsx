@@ -122,7 +122,7 @@ const AddProducts: React.FC = () => {
             mrp,
             discount,
             price: getFinalPrice(mrp, discount),
-            stockQuantity: 0,
+            stockQuantity: 1000000,
           };
         });
       } else {
@@ -130,7 +130,7 @@ const AddProducts: React.FC = () => {
           mrp: globalMRP,
           discount: globalDiscount,
           price: getFinalPrice(globalMRP, globalDiscount),
-          stockQuantity: 0,
+          stockQuantity: 1000000,
         };
       }
 
