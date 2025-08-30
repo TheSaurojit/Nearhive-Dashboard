@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useStoresQuery } from "@/hooks/useFiresStoreQueries"; 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -68,6 +69,16 @@ export default function ProductTable() {
 
 
   const { data: products = [] } = useProductsQuery();
+   const { data: stores = [] } = useStoresQuery(); // ✅ fetch stores
+
+  // ✅ Build a map: { storeId -> storeName }
+  const storeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const s of stores) {
+      map[s.storeId] = s.name;
+    }
+    return map;
+  }, [stores]);
 
   useEffect(() => {
     if (products.length) {
@@ -157,11 +168,16 @@ export default function ProductTable() {
         );
       },
     },
-    {
+      {
       header: "Store Name",
-      cell: ({ row }) => (
-        <span className="font-medium">{row.original.storeId}</span>
-      ),
+      cell: ({ row }) => {
+        const storeId = row.original.storeId;
+        return (
+          <span className="font-medium">
+            {storeMap[storeId] ?? "Unknown Store"}
+          </span>
+        );
+      },
     },
     {
       header: "Price",

@@ -138,7 +138,7 @@ export type Order = {
   },
   storeCoordinates: {
     lat: number;
-    lng: number;
+    long: number;
   };
   storeId: string;
   storename: string;
