@@ -103,6 +103,7 @@ type OrderStatusStep = {
 };
 
 export type Order = {
+  id : string ;
   commission: number;
   couponCode: string;
   couponDiscount: number;
