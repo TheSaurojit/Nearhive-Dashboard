@@ -16,82 +16,40 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-
-// Dummy cancelled orders data
-const dummyOrders = [
-  {
-    id: "ORD123",
-    store: "FreshMart",
-    product: "Bananas",
-    phone: "9876543210",
-    ordered: new Date("2025-07-01"),
-    status: "cancelled",
-  },
-  {
-    id: "ORD124",
-    store: "GreenGrocers",
-    product: "Apples",
-    phone: "9123456780",
-    ordered: new Date("2025-07-01"),
-    status: "cancelled",
-  },
-  {
-    id: "ORD125",
-    store: "VeggieVilla",
-    product: "Tomatoes",
-    phone: "9001234567",
-    ordered: new Date("2025-06-30"),
-    status: "cancelled",
-  },
-    {
-    id: "ORD126",
-    store: "VeggieVilla",
-    product: "Tomatoes",
-    phone: "9001234567",
-    ordered: new Date("2025-06-30"),
-    status: "cancelled",
-  },
-    {
-    id: "ORD127",
-    store: "VeggieVilla",
-    product: "Tomatoes",
-    phone: "9001234567",
-    ordered: new Date("2025-06-30"),
-    status: "cancelled",
-  },
-
-
-    {
-    id: "ORD128",
-    store: "VeggieVilla",
-    product: "Tomatoes",
-    phone: "9001234567",
-    ordered: new Date("2025-06-30"),
-    status: "cancelled",
-  },
-    {
-    id: "ORD129",
-    store: "VeggieVilla",
-    product: "Tomatoes",
-    phone: "9001234567",
-    ordered: new Date("2025-06-30"),
-    status: "cancelled",
-  },
-]
+import { useOrdersQuery } from "@/hooks/useFiresStoreQueries"
+import { Order } from "@/types/backend/models" // ✅ adjust import path
 
 export function CancelledOrdersBox() {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>()
   const [currentPage, setCurrentPage] = React.useState(1)
   const itemsPerPage = 5
 
-  const filteredOrders = dummyOrders
-    .filter((order) => {
-      if (selectedDate) {
-        return isSameDay(order.ordered, selectedDate)
-      }
-      return true
-    })
-    .sort((a, b) => b.ordered.getTime() - a.ordered.getTime())
+  // ✅ fetch orders
+  const { data: orders = [], isLoading } = useOrdersQuery()
+
+  // ✅ filter only cancelled orders
+  const cancelledOrders: Order[] = React.useMemo(() => {
+    return orders.filter((order) => order.status?.cancelled)
+  }, [orders])
+
+  // ✅ filter by date if selected
+  const filteredOrders = React.useMemo(() => {
+    return cancelledOrders
+      .filter((order) => {
+        if (selectedDate) {
+          return isSameDay(
+            order.orderAt instanceof Date ? order.orderAt : order.orderAt.toDate(),
+            selectedDate
+          )
+        }
+        return true
+      })
+      .sort((a, b) => {
+        const dateA = a.orderAt instanceof Date ? a.orderAt : a.orderAt.toDate()
+        const dateB = b.orderAt instanceof Date ? b.orderAt : b.orderAt.toDate()
+        return dateB.getTime() - dateA.getTime()
+      })
+  }, [cancelledOrders, selectedDate])
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
 
@@ -101,7 +59,7 @@ export function CancelledOrdersBox() {
   )
 
   return (
-    <div className="p-6 bg-card rounded-2xl shadow-md space-y-4 border w-full ">
+    <div className="p-6 bg-card rounded-2xl shadow-md space-y-4 border w-full">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Cancelled Orders</h2>
 
@@ -124,7 +82,7 @@ export function CancelledOrdersBox() {
               selected={selectedDate}
               onSelect={(date) => {
                 setSelectedDate(date)
-                setCurrentPage(1) // reset page on new date
+                setCurrentPage(1) // reset pagination when date changes
               }}
               initialFocus
             />
@@ -133,42 +91,58 @@ export function CancelledOrdersBox() {
       </div>
 
       {/* Table */}
-     <div className="rounded-xl border max-h-[400px] overflow-y-auto overflow-x-scroll w-full">
-  <div className="min-w-[600px]">
-    <Table>
-      <TableHeader className="sticky top-0 bg-muted z-10">
-        <TableRow>
-          <TableHead>Order ID</TableHead>
-          <TableHead>Store</TableHead>
-          <TableHead>Product</TableHead>
-          <TableHead>Phone</TableHead>
-          <TableHead>Ordered</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {paginatedOrders.length > 0 ? (
-          paginatedOrders.map((order) => (
-            <TableRow key={order.id}>
-              <TableCell>{order.id}</TableCell>
-              <TableCell>{order.store}</TableCell>
-              <TableCell>{order.product}</TableCell>
-              <TableCell>{order.phone}</TableCell>
-              <TableCell>{format(order.ordered, "dd MMM yyyy")}</TableCell>
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
-              No cancelled orders for selected date
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
-  </div>
-</div>
+      <div className="rounded-xl border max-h-[400px] overflow-y-auto overflow-x-scroll w-full">
+        <div className="min-w-[600px]">
+          <Table>
+            <TableHeader className="sticky top-0 bg-muted z-10">
+              <TableRow>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Store</TableHead>
+                <TableHead>Products</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Ordered</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-10">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : paginatedOrders.length > 0 ? (
+                paginatedOrders.map((order) => {
+                  const date =
+                    order.orderAt instanceof Date
+                      ? order.orderAt
+                      : order.orderAt.toDate()
 
-
+                  return (
+                    <TableRow key={order.orderId}>
+                      <TableCell>{order.orderId}</TableCell>
+                      <TableCell>{order.storename}</TableCell>
+                      <TableCell>
+                        {order.products.map((p) => p.name).join(", ")}
+                      </TableCell>
+                      <TableCell>{order.userId}</TableCell>
+                      <TableCell>{format(date, "dd MMM yyyy")}</TableCell>
+                    </TableRow>
+                  )
+                })
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-10 text-muted-foreground"
+                  >
+                    No cancelled orders {selectedDate ? "for selected date" : ""}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
       {/* Pagination */}
       {filteredOrders.length > itemsPerPage && (
@@ -197,4 +171,3 @@ export function CancelledOrdersBox() {
     </div>
   )
 }
-

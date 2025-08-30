@@ -93,10 +93,18 @@ export default function ProductTable() {
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+  return products.filter((product) => {
+    const productName = product.name.toLowerCase();
+    const storeName = (storeMap[product.storeId] || "").toLowerCase();
+    const query = debouncedSearch.toLowerCase();
+
+    return (
+      productName.includes(query) ||
+      storeName.includes(query)
     );
-  }, [products, debouncedSearch]);
+  });
+}, [products, debouncedSearch, storeMap]);
+
 
   const columns: ColumnDef<Product, unknown>[] = [
     {
@@ -105,27 +113,30 @@ export default function ProductTable() {
       cell: ({ row }) => (
         <Dialog>
           <DialogTrigger asChild>
-            <Image
-              src={row.original.imageUrl}
-              alt={row.original.name}
-              width={40}
-              height={40}
-              className="rounded-full object-cover cursor-pointer"
-              onClick={() => setPreviewImage(row.original.imageUrl)}
-            />
+            <div className="w-10 h-10 relative rounded-md overflow-hidden cursor-pointer" onClick={() => setPreviewImage(row.original.imageUrl)}>
+  <Image
+    src={row.original.imageUrl}
+    alt={row.original.name}
+    fill
+    className="object-cover"
+  />
+</div>
+
           </DialogTrigger>
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle>Product Image</DialogTitle>
             </DialogHeader>
-            <div className="w-full aspect-square relative">
-              <Image
-                src={previewImage || ""}
-                alt="Preview"
-                fill
-                className="object-cover rounded-md"
-              />
-            </div>
+    <div className="w-full max-w-xs aspect-square relative rounded-md overflow-hidden">
+  <Image
+    src={previewImage || ""}
+    alt="Preview"
+    fill
+    className="object-cover"
+  />
+</div>
+
+
           </DialogContent>
         </Dialog>
       ),
@@ -280,16 +291,19 @@ export default function ProductTable() {
 
   ];
 
-  const table = useReactTable({
-    data: filteredProducts,
-    columns,
-    state: { sorting, pagination },
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-  });
+const table = useReactTable({
+  data: filteredProducts,
+  columns,
+  state: { sorting, pagination },
+  onSortingChange: setSorting,
+  onPaginationChange: setPagination,
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  autoResetPageIndex: false, // ✅ keep current page after data refresh
+});
+
+
 
   return (
     <div className="space-y-4">

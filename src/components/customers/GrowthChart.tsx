@@ -251,7 +251,7 @@ export default function CustomerTable() {
             </PopoverContent>
           </Popover>
 
-          <Select
+          {/* <Select
             value={categoryFilter}
             onValueChange={(value) => {
               setCategoryFilter(value)
@@ -266,7 +266,7 @@ export default function CustomerTable() {
               <SelectItem value="food">Only Food</SelectItem>
               <SelectItem value="grocery">Only Grocery</SelectItem>
             </SelectContent>
-          </Select>
+          </Select> */}
 
           <Popover>
             <PopoverTrigger asChild>

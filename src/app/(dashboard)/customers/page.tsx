@@ -7,6 +7,8 @@ function Customers() {
     <h1 className='font-bold lg:text-4xl sm:text-sm'>Customer Table</h1>
     <div className='mt-5'>
     <GrowthChart/>
+    
+
     </div>
 
    </div>
