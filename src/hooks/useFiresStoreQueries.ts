@@ -9,6 +9,7 @@ import { fetchOrders } from "@/services/orders";
 import { fetchProducts } from "@/services/products";
 import { fetchStores } from "@/services/stores";
 import { fetchUsers } from "@/services/users";
+import { fetchVideos } from "@/services/videos";
 import { useQuery } from "@tanstack/react-query";
 
 // Hook for stores
@@ -137,6 +138,18 @@ export function useFoodPlaylistQuery() {
         queryFn: fetchFoodPlaylist ,
         refetchOnWindowFocus : false ,
         refetchOnMount : false ,
+    });
+}
+
+
+// Hook for food playlist
+export function useVideosQuery() {
+    return useQuery({
+        queryKey: ["videos"],
+        queryFn: fetchVideos ,
+        refetchOnWindowFocus : true ,
+        refetchOnMount : false ,
+        refetchInterval : 3000
     });
 }
 
