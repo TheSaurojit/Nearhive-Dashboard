@@ -20,6 +20,7 @@ import {
   Maximize,
   StoreIcon,
   Music,
+  VideoIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -60,7 +61,8 @@ const items = [
   { title: "Campaigns", url: "/campaigns", icon: Flag },
   { title: "Cuisine", url: "/cuisine", icon: Pizza },
   { title: "Hive Creators", url: "/hivecreators", icon: Projector },
-   { title: "Food Playlist", url: "/foodplaylist", icon: Music },
+  { title: "Food Playlist", url: "/foodplaylist", icon: Music },
+    { title: "Videos", url: "/videos", icon: VideoIcon },
 ];
 
 const AppSidebar = () => {

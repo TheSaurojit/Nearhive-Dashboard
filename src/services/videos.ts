@@ -7,7 +7,7 @@ type VideosFetch = {
     videoUrl: string;
 }
 
-type VideoCreate = {
+export type VideoCreate = {
     image: File;
     videoUrl: string;
 }
