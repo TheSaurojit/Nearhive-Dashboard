@@ -132,7 +132,7 @@ const AppSidebar = () => {
                   </SidebarMenuItem>
                   <SidebarMenuItem className={isActive("/storecategories") ? "bg-white text-black rounded-md" : ""}>
                     <SidebarMenuButton asChild>
-                      <Link href="/stores" className="flex items-center gap-2">
+                      <Link href="/storecategories" className="flex items-center gap-2">
                         <StoreIcon/>
                         Store Categories
                       </Link>
