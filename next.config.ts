@@ -23,6 +23,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.cubesnjuliennes.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.ctfassets.net",
+      },
     ],
   },
   eslint: {

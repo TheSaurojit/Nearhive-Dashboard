@@ -18,6 +18,8 @@ import {
   Boxes,
   IndianRupee,
   Maximize,
+  StoreIcon,
+  Music,
 } from "lucide-react";
 import {
   Sidebar,
@@ -58,6 +60,7 @@ const items = [
   { title: "Campaigns", url: "/campaigns", icon: Flag },
   { title: "Cuisine", url: "/cuisine", icon: Pizza },
   { title: "Hive Creators", url: "/hivecreators", icon: Projector },
+   { title: "Food Playlist", url: "/foodplaylist", icon: Music },
 ];
 
 const AppSidebar = () => {
@@ -124,6 +127,14 @@ const AppSidebar = () => {
                       <Link href="/stores" className="flex items-center gap-2">
                         <Pizza />
                         Food
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem className={isActive("/storecategories") ? "bg-white text-black rounded-md" : ""}>
+                    <SidebarMenuButton asChild>
+                      <Link href="/stores" className="flex items-center gap-2">
+                        <StoreIcon/>
+                        Store Categories
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
