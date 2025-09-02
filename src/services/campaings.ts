@@ -1,5 +1,6 @@
 import { FirestoreService } from "@/firebase/firestoreService";
 import { Campaign } from "@/types/backend/models";
+import { arrayUnion } from "firebase/firestore";
 
 // Fetch all campaigns 
 export async function fetchCampaigns(): Promise<Campaign[]> {
@@ -19,8 +20,8 @@ export async function createCampaign({ title, productIds = [] }: Campaign): Prom
     }
 
     await FirestoreService.addDoc("Campaigns", {
-        title : campaign.title,
-        productIds : campaign.productIds
+        title: campaign.title,
+        productIds: campaign.productIds
     });
 
     return campaign;
@@ -30,25 +31,52 @@ export async function createCampaign({ title, productIds = [] }: Campaign): Prom
 // update campaign
 export async function updateCampaign(campaignId: string, { title, productIds }: Campaign): Promise<Campaign> {
 
-        const campaign = {
+    const campaign = {
         title,
         productIds
     }
 
     await FirestoreService.updateDoc("Campaigns", campaignId, {
-        title : campaign.title,
-        productIds : campaign.productIds
+        title: campaign.title,
+        productIds: campaign.productIds
     });
-    
+
     return campaign;
 }
 
 
+
+
+// insert images in campaign
+export async function updateCampaignImages(images: File[]) {
+
+    const imageUrls = await Promise.all(images.map(img => FirestoreService.uploadFile(img, "Campaign")))
+
+
+    await FirestoreService.updateDoc("Campaigns", "campaignDoc", {
+
+        imageUrls: imageUrls
+
+    });
+
+}
+
+
+// insert productIds in campaign
+export async function updateCampaignProducts(productId: string) {
+    await FirestoreService.updateDoc("Campaigns", "campaignDoc", {
+
+        productIds: arrayUnion(productId)
+    })
+}
+
 //delete campaign
-export async function deleteCampaign(campaignId: string): Promise<string> {
+export async function deleteCampaignData() {
 
-    await FirestoreService.deleteDoc("Campaigns", campaignId)
+    await FirestoreService.updateDoc("Campaigns", "campaignDoc", {
+        imageUrls: [],
+        productIds: [],
+    })
 
-    return campaignId
 
 }
