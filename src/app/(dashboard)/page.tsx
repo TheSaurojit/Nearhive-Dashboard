@@ -2,7 +2,6 @@
 
 import { FirestoreService } from "@/firebase/firestoreService";
 import { dump } from "@/helper/helper";
-import { updateCampaignProducts } from "@/services/campaings";
 import { addToFeaturedStores, fetchFeaturedStores, removeFromFeaturedStores } from "@/services/featuredStores";
 import { fetchPendingCreators, fetchVerifiedCreators } from "@/services/hiveCreators";
 import { fetchMiddlemenEarning } from "@/services/middlemen";
@@ -16,7 +15,7 @@ export default async function page() {
 
     // await fetchProductCategories("nOxFROaDwelLBzFkcqSS")
 
-    await updateCampaignProducts("000c80fd-3a4e-481e-8bfd-95e319a872a8")
+    
 
     //   const cutoffDate = new Date("2025-08-05T02:12:20+05:30"); // Your cutoff date
 

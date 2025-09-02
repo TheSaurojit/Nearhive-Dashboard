@@ -102,7 +102,7 @@ export const FirestoreService = {
   uploadFile: async (file: File, path: string): Promise<string> => {
 
      const options = {
-      maxSizeMB: 1, // Max size (1MB)
+      maxSizeMB: 0.2, // Max size (200kb)
       maxWidthOrHeight: 1920, // Resize
       useWebWorker: true,
     };

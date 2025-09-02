@@ -18,7 +18,7 @@ export function useStoresQuery() {
         queryKey: ["stores"],
         queryFn: fetchStores ,
         refetchOnWindowFocus : false ,
-        refetchOnMount : false ,
+        refetchOnMount : true ,
         // refetchInterval : 5000
     });
 }

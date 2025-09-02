@@ -17,6 +17,7 @@ export type Store = {
   isPaused: boolean;
   location: string;
   logoUrl: string;
+  bannerUrl : string ;
   name: string;
   ownerId: string;
   phone: string;
