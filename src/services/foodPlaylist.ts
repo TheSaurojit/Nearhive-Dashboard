@@ -11,6 +11,9 @@ type CreateFoodPlaylist = {
 // Fetch list 
 export async function fetchFoodPlaylist() {
 
+    console.log("fetching playslist" , Date.now());
+    
+
     const lists = await FirestoreService.getAllDocs("Foodplaylist") as FoodPlaylist[];
 
     return lists;

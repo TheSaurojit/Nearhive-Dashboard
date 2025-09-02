@@ -114,7 +114,7 @@ export function useVerifiedCreatorsQuery() {
         queryKey: ["verifiedCreators"],
         queryFn: fetchVerifiedCreators ,
         refetchOnWindowFocus : false ,
-        refetchOnMount : false ,
+        refetchOnMount : true ,
         // refetchInterval : 5000
     });
 }
@@ -137,19 +137,18 @@ export function useFoodPlaylistQuery() {
         queryKey: ["foodPlaylist"],
         queryFn: fetchFoodPlaylist ,
         refetchOnWindowFocus : false ,
-        refetchOnMount : false ,
+        refetchOnMount : true ,
     });
 }
 
 
-// Hook for food playlist
+// Hook for videos
 export function useVideosQuery() {
     return useQuery({
         queryKey: ["videos"],
         queryFn: fetchVideos ,
-        refetchOnWindowFocus : true ,
-        refetchOnMount : false ,
-        refetchInterval : 3000
+        refetchOnWindowFocus : false ,
+        refetchOnMount : true ,
     });
 }
 
