@@ -1,136 +1,140 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { Button } from "@/components/ui/button"
+import React, { useEffect, useState } from "react";
+import { fetchCampaigns } from "@/services/campaings";
+import { fetchProducts } from "@/services/products";
+import { Campaign, Product } from "@/types/backend/models";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { createCampaign } from "@/services/campaings"
-import { Campaign, Product } from "@/types/backend/models"
-import { useCampaignsQuery } from "@/hooks/useFiresStoreQueries"
-import { Trash2 } from "lucide-react"
-import { useProductsQuery } from "@/hooks/query/useProducts"
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
-type CampaignWithId = Campaign & { id: string }
+type CampaignWithProducts = Campaign & { products: Product[] };
 
+function CampaignHead() {
+  const [campaigns, setCampaigns] = useState<CampaignWithProducts[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function CampaignHead() {
-  const [open, setOpen] = useState(false)
-  const [title, setTitle] = useState("")
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [campaignsData, productsData] = await Promise.all([
+          fetchCampaigns(),
+          fetchProducts(),
+        ]);
 
- const { data: rawCampaigns = [], refetch } = useCampaignsQuery()
+        const withProducts: CampaignWithProducts[] = campaignsData.map(
+          (campaign) => {
+            const matchedProducts = productsData.filter((p) =>
+              campaign.productIds?.includes(p.productId)
+            );
+            return { ...campaign, products: matchedProducts };
+          }
+        );
 
-const campaigns: CampaignWithId[] = rawCampaigns.map((doc: any) => ({
-  ...(doc as Campaign),
-  id: doc.id,
-}))
+        setCampaigns(withProducts);
+      } catch (err) {
+        console.error("Error loading campaigns/products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const { data: products = [] } = useProductsQuery() as {
-    data: Product[]
-  }
+    loadData();
+  }, []);
 
-  const handleCreateCampaign = async () => {
-    if (!title.trim()) return
-    const newCampaign: Campaign = {
-      title: title.trim(),
-      productIds: [],
-    }
-    await createCampaign(newCampaign)
-    setTitle("")
-    setOpen(false)
-    refetch()
-  }
+  if (loading) return <p>Loading campaigns...</p>;
+  if (!campaigns.length) return <p>No campaigns found</p>;
 
   return (
-    <div className="p-4">
-      {/* Create Campaign Dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="default">+ Campaign</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create Campaign</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <Input
-              placeholder="Campaign Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <Button onClick={handleCreateCampaign}>Create</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+    <div className="p-6 space-y-8">
+      {campaigns.map((campaign, idx) => (
+        <Card key={idx} className="rounded-2xl shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl">{campaign.title}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Campaign Images */}
+           {/* Campaign Images */}
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+  {campaign.imageUrls?.map((url, i) => (
+    <div
+      key={i}
+      className="w-full h-40 bg-muted rounded-xl flex items-center justify-center overflow-hidden"
+    >
+      <img
+        src={url}
+        alt={`Campaign ${campaign.title} image ${i + 1}`}
+        className="max-w-full max-h-full object-contain"
+      />
+    </div>
+  ))}
+</div>
 
-      {/* Campaign List */}
-      <div className="mt-6 space-y-8">
-        {campaigns.map((campaign) => {
-          const matchedProducts = products.filter((product) =>
-            campaign.productIds.includes(product.productId)
-          )
 
-          return (
-            <div key={campaign.id} className="space-y-2">
-              <h2 className="text-xl font-semibold">{campaign.title}</h2>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>MRP</TableHead>
-                    <TableHead>Discount</TableHead>
-                    <TableHead>Cuisine</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {matchedProducts.length > 0 ? (
-                    matchedProducts.map((product) => {
-                      const firstVariation = Object.values(product.variations)[0]
+            {/* Products */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Products</h3>
+              {campaign.products.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Discount</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {campaign.products.map((product) => {
+                      const firstVar = Object.values(product.variations)[0];
                       return (
                         <TableRow key={product.productId}>
                           <TableCell>{product.name}</TableCell>
-                          <TableCell>{firstVariation?.price ?? "-"}</TableCell>
-                          <TableCell>{firstVariation?.mrp ?? "-"}</TableCell>
-                          <TableCell>{firstVariation?.discount ?? "-"}</TableCell>
-                          <TableCell>{product.cuisine}</TableCell>
-                          <TableCell>{product.type}</TableCell>
                           <TableCell>
-                            <Button size="icon" variant="ghost">
-                              <Trash2 className="h-4 w-4 text-red-500" />
+                            ₹{firstVar?.price ?? "-"}
+                          </TableCell>
+                          <TableCell>
+                            {firstVar?.discount ?? 0}%
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() =>
+                                console.log("delete product", product.productId)
+                              }
+                            >
+                              Delete
                             </Button>
                           </TableCell>
                         </TableRow>
-                      )
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
-                        No products
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No products added yet.
+                </p>
+              )}
             </div>
-          )
-        })}
-      </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
-  )
+  );
 }
+
+export default CampaignHead;

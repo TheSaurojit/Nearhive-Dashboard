@@ -1,87 +1,64 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { useCampaignsQuery } from "@/hooks/useFiresStoreQueries"
-import { Campaign } from "@/types/backend/models"
-import { updateCampaign } from "@/services/campaings"
-import { toast } from "sonner"
+import { useEffect, useState } from "react";
+import { updateCampaignProducts, fetchCampaigns } from "@/services/campaings";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Props {
-  open: boolean
-  onClose: () => void
-  productId: string
+  productId: string;
 }
 
-type CampaignFetch = Campaign & {
-  id: string;
-};
+export default function AddToCampaignButton({ productId }: Props) {
+  const [status, setStatus] = useState<"idle" | "loading" | "added">("idle");
 
-export default function AddToCampaignSheet({ open, onClose, productId }: Props) {
-  const { data: campaigns = [], refetch } = useCampaignsQuery()
-  const [localCampaigns, setLocalCampaigns] = useState<CampaignFetch[]>([])
-
+  // Check if product is already in campaign
   useEffect(() => {
-    if (campaigns.length) {
-      setLocalCampaigns(campaigns as CampaignFetch[])
-    }
-  }, [campaigns])
+    const checkIfAdded = async () => {
+      try {
+        const campaigns = await fetchCampaigns();
+        const alreadyAdded = campaigns.some((c) =>
+          c.productIds?.includes(productId)
+        );
+        if (alreadyAdded) {
+          setStatus("added");
+        }
+      } catch (err) {
+        console.error("Error checking campaigns:", err);
+      }
+    };
 
-  const handleToggle = async (campaign: CampaignFetch, checked: boolean) => {
-    let updatedIds = [...campaign.productIds]
+    checkIfAdded();
+  }, [productId]);
 
-    if (checked && !updatedIds.includes(productId)) {
-      updatedIds.push(productId)
-    } else if (!checked && updatedIds.includes(productId)) {
-      updatedIds = updatedIds.filter(id => id !== productId)
-    }
+  const handleClick = async () => {
+    if (status === "added") return; // prevent re-click
 
     try {
-      await updateCampaign(campaign.id, {
-        title: campaign.title,
-        productIds: updatedIds,
-      })
-      toast.success("Campaign updated")
-      refetch()
+      setStatus("loading");
+      await updateCampaignProducts(productId);
+      setStatus("added");
+      toast.success("Added to campaign");
     } catch (err) {
-      toast.error("Failed to update campaign")
+      console.error(err);
+      setStatus("idle");
+      toast.error("Failed to add to campaign");
     }
-  }
+  };
 
   return (
-    <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Add to Campaign</SheetTitle>
-        </SheetHeader>
-
-        <div className="mt-4 space-y-4">
-          {localCampaigns.map((campaign) => {
-            const isActive = campaign.productIds.includes(productId)
-
-            return (
-              <div key={campaign.id} className="flex items-center justify-between">
-                <Label>{campaign.title}</Label>
-                <Switch
-                  checked={isActive}
-                  onCheckedChange={(checked) => handleToggle(campaign, checked)}
-                />
-              </div>
-            )
-          })}
-
-          {!localCampaigns.length && (
-            <p className="text-sm text-muted-foreground">No campaigns found.</p>
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
-  )
+    <Button
+      onClick={handleClick}
+      disabled={status === "loading" || status === "added"}
+      className={
+        status === "added"
+          ? "bg-green-600 hover:bg-green-700 text-white"
+          : ""
+      }
+    >
+      {status === "idle" && "Add to Campaign"}
+      {status === "loading" && "Adding..."}
+      {status === "added" && "Added"}
+    </Button>
+  );
 }

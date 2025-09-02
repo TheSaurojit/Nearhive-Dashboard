@@ -46,6 +46,7 @@ import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import EditProduct from "./editProduct";
 import AddToPlaylistSheet from "./AddPlaylist"
+import AddToCampaignButton from "./AddToCampaignSheet";
 
 
 const AddToCampaignSheet = dynamic(() => import("./AddToCampaignSheet"), {
@@ -266,19 +267,12 @@ export default function ProductTable() {
       <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={() => setEditProduct(row.original)}>Edit</Button>
         <Button variant="destructive" size="sm">Delete</Button>
-        <Button variant="secondary" size="sm" onClick={() => setActiveProductId(productId)}>
-          Add Campaign
-        </Button>
+    
         <Button variant="outline" size="sm" onClick={() => setPlaylistProductId(productId)}>
           Add Playlist
         </Button>
 
-        <AddToCampaignSheet
-          open={activeProductId === productId}
-          onClose={() => setActiveProductId(null)}
-          productId={productId}
-        />
-
+<AddToCampaignButton productId={productId} />
         <AddToPlaylistSheet
           open={playlistProductId === productId}
           onClose={() => setPlaylistProductId(null)}

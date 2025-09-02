@@ -35,7 +35,6 @@ export type Campaign = {
   title: string;
   imageUrls : string[]
   productIds: string[]
-
 }
 
 // type for middlemen
