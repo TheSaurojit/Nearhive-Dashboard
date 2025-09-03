@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet"
+import {
   useFeaturedStoresQuery,
   useStoresQuery,
 } from "@/hooks/useFiresStoreQueries"
@@ -16,6 +23,7 @@ import {
   addToFeaturedStores,
   removeFromFeaturedStores,
 } from "@/services/featuredStores"
+import { makeStoreActive, makeStoreInActive } from "@/services/stores" 
 import EditLogosDialog from "./EditLogosDialog"
 
 const ITEMS_PER_PAGE = 10
@@ -24,8 +32,9 @@ function StoreTable() {
   const [search, setSearch] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [editStoreId, setEditStoreId] = useState<string | null>(null)
+  const [manageStore, setManageStore] = useState<Store | null>(null)
 
-  const { data: storesData = [], isLoading } = useStoresQuery()
+  const { data: storesData = [], isLoading, refetch: refetchStores } = useStoresQuery()
   const { data: FeaturedData, refetch: refetchFeatured } =
     useFeaturedStoresQuery() as { data?: FeaturedStores; refetch: () => void }
 
@@ -55,6 +64,18 @@ function StoreTable() {
       refetchFeatured()
     } catch (err) {
       alert("Error updating featured status")
+    }
+  }
+
+  const handleToggleActive = async (store: Store, newValue: boolean) => {
+    try {
+      if (newValue) await makeStoreActive(store.storeId)
+      else await makeStoreInActive(store.storeId)
+
+      await refetchStores()
+      setManageStore((prev) => prev ? { ...prev, isActive: newValue } : prev)
+    } catch (err) {
+      alert("Error updating store state")
     }
   }
 
@@ -134,9 +155,12 @@ function StoreTable() {
                         onCheckedChange={(c) => handleToggleFeatured(store.storeId, c)}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="space-x-2">
                       <Button size="sm" onClick={() => setEditStoreId(store.storeId)}>
                         Edit Logos
+                      </Button>
+                      <Button size="sm" variant="secondary" onClick={() => setManageStore(store)}>
+                        Manage
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -176,6 +200,31 @@ function StoreTable() {
 
       {/* Edit Logos Dialog */}
       <EditLogosDialog storeId={editStoreId} onClose={() => setEditStoreId(null)} />
+
+      {/* Manage Sheet */}
+      <Sheet open={!!manageStore} onOpenChange={(o) => !o && setManageStore(null)}>
+        <SheetContent side="right">
+          <SheetHeader>
+            <SheetTitle>Manage Store</SheetTitle>
+          </SheetHeader>
+
+          {manageStore && (
+            <div className="py-4">
+              <div className="flex items-center justify-between">
+                <span>Store State</span>
+                <Switch
+                  checked={manageStore.isActive}
+                  onCheckedChange={(c) => handleToggleActive(manageStore, c)}
+                />
+              </div>
+            </div>
+          )}
+
+          <SheetFooter>
+            <Button variant="outline" onClick={() => setManageStore(null)}>Close</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

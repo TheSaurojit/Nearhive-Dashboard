@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useStoresQuery } from "@/hooks/useFiresStoreQueries"; 
+import { useStoresQuery } from "@/hooks/useFiresStoreQueries";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -41,22 +41,37 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { Product } from "@/types/backend/models";
-import { Timestamp } from "firebase/firestore";
-
+import { Timestamp, arrayRemove } from "firebase/firestore";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+
 import EditProduct from "./editProduct";
-import AddToPlaylistSheet from "./AddPlaylist"
+import AddToPlaylistSheet from "./AddPlaylist";
 import AddToCampaignButton from "./AddToCampaignSheet";
 
+import { addToFeaturedProducts } from "@/services/products";
+import { FirestoreService } from "@/firebase/firestoreService";
 
 const AddToCampaignSheet = dynamic(() => import("./AddToCampaignSheet"), {
   ssr: false,
   loading: () => <p className="text-sm text-muted-foreground">Loading...</p>,
 });
 
+// ✅ remove function (needed for un-toggle)
+async function removeFromFeaturedProducts({
+  storeId,
+  productId,
+}: {
+  storeId: string;
+  productId: string;
+}) {
+  await FirestoreService.updateDoc("Stores", storeId, {
+    featuredProductIds: arrayRemove(productId),
+  });
+}
+
 export default function ProductTable() {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
-
   const [sorting, setSorting] = useState<SortingState>([]);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 500);
@@ -65,25 +80,28 @@ export default function ProductTable() {
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
   >({});
-  const [activeProductId, setActiveProductId] = useState<string | null>(null);
-  const [playlistProductId, setPlaylistProductId] = useState<string | null>(null)
-
+  const [playlistProductId, setPlaylistProductId] = useState<string | null>(
+    null
+  );
 
   const { data: products = [] } = useProductsQuery();
-   const { data: stores = [] } = useStoresQuery(); // ✅ fetch stores
+  const { data: stores = [], refetch: refetchStores } = useStoresQuery();
 
-  // ✅ Build a map: { storeId -> storeName }
+  // ✅ Map: storeId -> { name, featuredProductIds }
   const storeMap = useMemo(() => {
-    const map: Record<string, string> = {};
+    const map: Record<string, { name: string; featured: string[] }> = {};
     for (const s of stores) {
-      map[s.storeId] = s.name;
+      map[s.storeId] = {
+        name: s.name,
+        featured: s.featuredProductIds ?? [],
+      };
     }
     return map;
   }, [stores]);
 
   useEffect(() => {
     if (products.length) {
-      setSelectedVariants((prev) => {
+      setSelectedVariants(() => {
         const updated: Record<string, string> = {};
         for (const p of products) {
           updated[p.productId] = Object.keys(p.variations)[0] ?? "default";
@@ -94,18 +112,13 @@ export default function ProductTable() {
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-  return products.filter((product) => {
-    const productName = product.name.toLowerCase();
-    const storeName = (storeMap[product.storeId] || "").toLowerCase();
-    const query = debouncedSearch.toLowerCase();
-
-    return (
-      productName.includes(query) ||
-      storeName.includes(query)
-    );
-  });
-}, [products, debouncedSearch, storeMap]);
-
+    return products.filter((product) => {
+      const productName = product.name.toLowerCase();
+      const storeName = (storeMap[product.storeId]?.name || "").toLowerCase();
+      const query = debouncedSearch.toLowerCase();
+      return productName.includes(query) || storeName.includes(query);
+    });
+  }, [products, debouncedSearch, storeMap]);
 
   const columns: ColumnDef<Product, unknown>[] = [
     {
@@ -114,30 +127,30 @@ export default function ProductTable() {
       cell: ({ row }) => (
         <Dialog>
           <DialogTrigger asChild>
-            <div className="w-10 h-10 relative rounded-md overflow-hidden cursor-pointer" onClick={() => setPreviewImage(row.original.imageUrl)}>
-  <Image
-    src={row.original.imageUrl}
-    alt={row.original.name}
-    fill
-    className="object-cover"
-  />
-</div>
-
+            <div
+              className="w-10 h-10 relative rounded-md overflow-hidden cursor-pointer"
+              onClick={() => setPreviewImage(row.original.imageUrl)}
+            >
+              <Image
+                src={row.original.imageUrl}
+                alt={row.original.name}
+                fill
+                className="object-cover"
+              />
+            </div>
           </DialogTrigger>
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle>Product Image</DialogTitle>
             </DialogHeader>
-    <div className="w-full max-w-xs aspect-square relative rounded-md overflow-hidden">
-  <Image
-    src={previewImage || ""}
-    alt="Preview"
-    fill
-    className="object-cover"
-  />
-</div>
-
-
+            <div className="w-full max-w-xs aspect-square relative rounded-md overflow-hidden">
+              <Image
+                src={previewImage || ""}
+                alt="Preview"
+                fill
+                className="object-cover"
+              />
+            </div>
           </DialogContent>
         </Dialog>
       ),
@@ -155,7 +168,6 @@ export default function ProductTable() {
         const id = row.original.productId;
         const variants = Object.keys(row.original.variations);
         const current = selectedVariants[id] || variants[0];
-
         return (
           <Select
             value={current}
@@ -180,13 +192,13 @@ export default function ProductTable() {
         );
       },
     },
-      {
+    {
       header: "Store Name",
       cell: ({ row }) => {
         const storeId = row.original.storeId;
         return (
           <span className="font-medium">
-            {storeMap[storeId] ?? "Unknown Store"}
+            {storeMap[storeId]?.name ?? "Unknown Store"}
           </span>
         );
       },
@@ -258,46 +270,86 @@ export default function ProductTable() {
       header: "Type",
       cell: ({ row }) => (row.original.type === "veg" ? "Veg" : "Non-Veg"),
     },
-  {
-  id: "actions",
-  header: "Actions",
-  cell: ({ row }) => {
-    const productId = row.original.productId
-    return (
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => setEditProduct(row.original)}>Edit</Button>
-        <Button variant="destructive" size="sm">Delete</Button>
-    
-        <Button variant="outline" size="sm" onClick={() => setPlaylistProductId(productId)}>
-          Add Playlist
-        </Button>
+    {
+      header: "Featured",
+      cell: ({ row }) => {
+        const product = row.original;
+        const store = storeMap[product.storeId];
+        const isFeatured =
+          store?.featured?.includes(product.productId) ?? false;
 
-<AddToCampaignButton productId={productId} />
-        <AddToPlaylistSheet
-          open={playlistProductId === productId}
-          onClose={() => setPlaylistProductId(null)}
-          productId={productId}
-        />
-      </div>
-    );
-  },
-}
+        const toggleFeatured = async (checked: boolean) => {
+          try {
+            if (checked) {
+              await addToFeaturedProducts({
+                storeId: product.storeId,
+                productId: product.productId,
+              });
+            } else {
+              await removeFromFeaturedProducts({
+                storeId: product.storeId,
+                productId: product.productId,
+              });
+            }
+            await refetchStores();
+          } catch (err) {
+            console.error("Error updating featured status", err);
+            toast.error("Failed to update featured status");
+          }
+        };
 
+        return (
+          <Switch checked={isFeatured} onCheckedChange={toggleFeatured} />
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const productId = row.original.productId;
+        return (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditProduct(row.original)}
+            >
+              Edit
+            </Button>
+            <Button variant="destructive" size="sm">
+              Delete
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPlaylistProductId(productId)}
+            >
+              Add Playlist
+            </Button>
+            <AddToCampaignButton productId={productId} />
+            <AddToPlaylistSheet
+              open={playlistProductId === productId}
+              onClose={() => setPlaylistProductId(null)}
+              productId={productId}
+            />
+          </div>
+        );
+      },
+    },
   ];
 
-const table = useReactTable({
-  data: filteredProducts,
-  columns,
-  state: { sorting, pagination },
-  onSortingChange: setSorting,
-  onPaginationChange: setPagination,
-  getCoreRowModel: getCoreRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-  autoResetPageIndex: false, // ✅ keep current page after data refresh
-});
-
-
+  const table = useReactTable({
+    data: filteredProducts,
+    columns,
+    state: { sorting, pagination },
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: false,
+  });
 
   return (
     <div className="space-y-4">
@@ -345,20 +397,14 @@ const table = useReactTable({
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
@@ -389,6 +435,7 @@ const table = useReactTable({
           Next
         </Button>
       </div>
+
       {editProduct && (
         <EditProduct
           open={!!editProduct}
