@@ -6,7 +6,7 @@ import { addToFeaturedStores, fetchFeaturedStores, removeFromFeaturedStores } fr
 import { fetchPendingCreators, fetchVerifiedCreators } from "@/services/hiveCreators";
 import { fetchMiddlemenEarning } from "@/services/middlemen";
 import { fetchProductCategories, updateImageProductCategories } from "@/services/products";
-import { fetchStores } from "@/services/stores";
+import { fetchStores, makeStoreActive, makeStoreInActive } from "@/services/stores";
 import { Timestamp } from "firebase/firestore";
 import React, { useEffect } from "react";
 
@@ -14,8 +14,6 @@ export default async function page() {
   const ckData = async () => {
 
     // await fetchProductCategories("nOxFROaDwelLBzFkcqSS")
-
-    
 
     //   const cutoffDate = new Date("2025-08-05T02:12:20+05:30"); // Your cutoff date
 

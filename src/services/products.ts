@@ -1,7 +1,7 @@
 import { FirestoreService } from "@/firebase/firestoreService";
 import { toLowerNoSpaces } from "@/helper/helper";
 import { Product } from "@/types/backend/models";
-import { Timestamp } from "firebase/firestore";
+import { arrayUnion, Timestamp } from "firebase/firestore";
 
 type Variation = {
     discount: number;
@@ -176,3 +176,11 @@ export async function updateImageProductCategories({ storeId, categoryDocId, ima
 
 }
 
+
+
+export async function addToFeaturedProducts({ storeId , productId } : { storeId : string , productId : string }) {
+
+    await FirestoreService.updateDoc("Stores",storeId, {
+        featuredProductIds : arrayUnion(productId)
+    })
+}

@@ -24,6 +24,16 @@ export async function updateStoreLogos(storeId: string, { logo, banner }: StoreL
         bannerUrl: bannerUrl
     });
 
+}
 
+export async function makeStoreActive(storeId: string) {
+    await FirestoreService.updateDoc("Stores", storeId, {
+        isActive: true
+    })
+}
 
+export async function makeStoreInActive(storeId: string) {
+    await FirestoreService.updateDoc("Stores", storeId, {
+        isActive: false
+    })
 }
