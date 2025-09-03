@@ -26,7 +26,7 @@ export async function createFoodPlaylist({ image, productIds =[], text }: Create
     const list = {
         image: await FirestoreService.uploadFile(image, "FoodPlaylist",),
         productIds,
-        text : ""
+        text : text
     };
 
 
@@ -41,7 +41,7 @@ export async function updateFoodPlaylist(playlistId: string, { image, productIds
     const list = {
         image,
         productIds,
-        text : ""
+        text : text
     };
 
     await FirestoreService.updateDoc("Foodplaylist", playlistId, list);
