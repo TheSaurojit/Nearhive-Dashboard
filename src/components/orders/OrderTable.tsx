@@ -47,8 +47,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useOrdersQuery } from "@/hooks/useFiresStoreQueries";
-import type { Order } from "@/types/backend/models";
+import { useOrdersQuery, useUsersQuery } from "@/hooks/useFiresStoreQueries";
+import type { Order, User } from "@/types/backend/models";
 
 // Convert Firestore timestamp or ISO string to JS Date
 function toDate(ts: any): Date {
@@ -101,6 +101,16 @@ export function DataTableDemo() {
   const debouncedSearch = useDebounce(searchQuery, 300);
 
   const { data: ordersData = [], isLoading } = useOrdersQuery();
+  const { data: usersData = [] } = useUsersQuery();
+
+  // Build a quick lookup map for users
+  const usersMap = React.useMemo(() => {
+    const map: Record<string, User> = {};
+    usersData.forEach((user: User) => {
+      map[user.uid] = user;
+    });
+    return map;
+  }, [usersData]);
 
   const formattedOrders = React.useMemo(() => {
     return ordersData.map((order: Order) => {
@@ -150,14 +160,19 @@ export function DataTableDemo() {
         distance = `${d.toFixed(2)} km`;
       }
 
+      // Match user from usersMap
+      const user = usersMap[order.userId];
+      const customerName = user ? `${user.firstName} ${user.lastName}` : "-";
+
       return {
         id: order.orderId,
         ordered: orderDate, // keep Date for sorting
-        orderedDisplay: format(orderDate, "MMM d, hh:mm:ss a"), // formatted for UI
+        orderedDisplay: format(orderDate, "MMM d, hh:mm:ss a"),
         delivered: deliveredTimestamp ? format(deliveredTimestamp, "MMM d, hh:mm:ss a") : "-",
         deliveryTime,
         product: product.name,
         store: order.storename || order.storeId,
+        customer: customerName, // ✅ new column
         status: latestStatusKey || "-",
         payment: order.paymentMethod || "-",
         total: order.totalAmount || 0,
@@ -168,7 +183,7 @@ export function DataTableDemo() {
         orderRaw: order,
       };
     });
-  }, [ordersData]);
+  }, [ordersData, usersMap]);
 
   const filteredData = React.useMemo(() => {
     return formattedOrders.filter((item) => {
@@ -180,7 +195,8 @@ export function DataTableDemo() {
         matchesDate &&
         (item.id.toLowerCase().includes(searchLower) ||
           item.store.toLowerCase().includes(searchLower) ||
-          item.product.toLowerCase().includes(searchLower))
+          item.product.toLowerCase().includes(searchLower) ||
+          item.customer.toLowerCase().includes(searchLower)) // ✅ include customer
       );
     });
   }, [formattedOrders, selectedDate, debouncedSearch]);
@@ -198,6 +214,7 @@ export function DataTableDemo() {
     { accessorKey: "distance", header: "Distance Travelled" },
     { accessorKey: "product", header: "Product" },
     { accessorKey: "store", header: "Store" },
+    { accessorKey: "customer", header: "Customer" }, // ✅ new column
     { accessorKey: "status", header: "Status", cell: ({ row }) => <div className="capitalize">{row.getValue("status")}</div> },
     { accessorKey: "payment", header: "Payment" },
     {
