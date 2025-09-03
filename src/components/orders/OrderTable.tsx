@@ -89,7 +89,9 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function DataTableDemo() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "ordered", desc: true }, // default: newest first
+  ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -150,7 +152,8 @@ export function DataTableDemo() {
 
       return {
         id: order.orderId,
-        ordered: format(orderDate, "MMM d, hh:mm:ss a"),
+        ordered: orderDate, // keep Date for sorting
+        orderedDisplay: format(orderDate, "MMM d, hh:mm:ss a"), // formatted for UI
         delivered: deliveredTimestamp ? format(deliveredTimestamp, "MMM d, hh:mm:ss a") : "-",
         deliveryTime,
         product: product.name,
@@ -184,7 +187,12 @@ export function DataTableDemo() {
 
   const columns: ColumnDef<any>[] = [
     { accessorKey: "id", header: "Order ID" },
-    { accessorKey: "ordered", header: "Ordered" },
+    {
+      accessorKey: "ordered",
+      header: "Ordered",
+      cell: ({ row }) => format(row.getValue("ordered"), "MMM d, hh:mm:ss a"),
+      sortingFn: "datetime",
+    },
     { accessorKey: "delivered", header: "Delivered" },
     { accessorKey: "deliveryTime", header: "Delivery Time" },
     { accessorKey: "distance", header: "Distance Travelled" },
@@ -237,6 +245,7 @@ export function DataTableDemo() {
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: false, // 🔑 prevents reset
   });
 
   if (isLoading) return <div className="p-4">Loading orders...</div>;
