@@ -2,7 +2,7 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-    
+
       {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com",
@@ -15,11 +15,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.immediate.co.uk",
       },
-        {
+      {
         protocol: "https",
         hostname: "www.dwarakaorganic.com",
       },
-       {
+      {
         protocol: "https",
         hostname: "www.cubesnjuliennes.com",
       },
@@ -27,6 +27,12 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.ctfassets.net",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+
+      // images.unsplash.com/
     ],
   },
   eslint: {
