@@ -54,6 +54,9 @@ import {
 import { useOrdersQuery, useUsersQuery } from "@/hooks/useFiresStoreQueries";
 import type { Order, User } from "@/types/backend/models";
 
+// Extend Order type to include userRaw
+type OrderWithUser = Order & { userRaw?: User | null };
+
 // Convert Firestore timestamp or ISO string to JS Date
 function toDate(ts: any): Date {
   if (!ts) return new Date();
@@ -95,7 +98,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export function DataTableDemo() {
   const [sorting, setSorting] = React.useState<SortingState>([
-    { id: "ordered", desc: true }, // default: newest first
+    { id: "ordered", desc: true },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -103,7 +106,8 @@ export function DataTableDemo() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] =
+    React.useState<OrderWithUser | null>(null);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     undefined
   );
@@ -186,13 +190,11 @@ export function DataTableDemo() {
         distance = `${d.toFixed(2)} km`;
       }
 
-      // Match user from usersMap
       const user = usersMap[order.userId];
-      const customerName = user ? `${user.firstName} ${user.lastName}` : "-";
 
       return {
         id: order.orderId,
-        ordered: orderDate, // keep Date for sorting
+        ordered: orderDate,
         orderedDisplay: format(orderDate, "MMM d, hh:mm:ss a"),
         delivered: deliveredTimestamp
           ? format(deliveredTimestamp, "MMM d, hh:mm:ss a")
@@ -209,6 +211,7 @@ export function DataTableDemo() {
         storeCommission: order.commission || 0,
         distance,
         orderRaw: order,
+        userRaw: user,
       };
     });
   }, [ordersData, usersMap]);
@@ -224,7 +227,7 @@ export function DataTableDemo() {
         (item.id.toLowerCase().includes(searchLower) ||
           item.store.toLowerCase().includes(searchLower) ||
           item.product.toLowerCase().includes(searchLower) ||
-          item.customer.toLowerCase().includes(searchLower)) // ✅ include customer
+          item.customer.toLowerCase().includes(searchLower))
       );
     });
   }, [formattedOrders, selectedDate, debouncedSearch]);
@@ -242,7 +245,7 @@ export function DataTableDemo() {
     { accessorKey: "distance", header: "Distance Travelled" },
     { accessorKey: "product", header: "Product" },
     { accessorKey: "store", header: "Store" },
-    { accessorKey: "customer", header: "Customer" }, // ✅ new column
+    { accessorKey: "customer", header: "Customer" },
     {
       accessorKey: "status",
       header: "Status",
@@ -279,7 +282,12 @@ export function DataTableDemo() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => setSelectedOrder(payment.orderRaw)}
+                onClick={() =>
+                  setSelectedOrder({
+                    ...payment.orderRaw,
+                    userRaw: payment.userRaw,
+                  })
+                }
               >
                 View Order Details
               </DropdownMenuItem>
@@ -302,7 +310,7 @@ export function DataTableDemo() {
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    autoResetPageIndex: false, // 🔑 prevents reset
+    autoResetPageIndex: false,
   });
 
   if (isLoading) return <div className="p-4">Loading orders...</div>;
@@ -431,6 +439,7 @@ export function DataTableDemo() {
         </Button>
       </div>
 
+      {/* Order Sheet */}
       {selectedOrder && (
         <Sheet
           open={!!selectedOrder}
@@ -487,6 +496,15 @@ export function DataTableDemo() {
                 </p>
               </div>
 
+              {selectedOrder.userRaw && (
+                <div>
+                  <h3 className="font-semibold mb-2">User Info</h3>
+                  <p>
+                    <strong>Phone:</strong> {selectedOrder.userRaw.phoneNumber}
+                  </p>
+                </div>
+              )}
+
               <div>
                 <h3 className="font-semibold mb-2">Price Details</h3>
                 <p>
@@ -505,10 +523,8 @@ export function DataTableDemo() {
 
               <div>
                 <h3 className="font-semibold mb-2">Order Timeline</h3>
-                <p>
-                  <strong>Ordered:</strong>{" "}
-                  {format(toDate(selectedOrder.orderAt), "PPP p")}
-                </p>
+   
+
                 {Object.entries(selectedOrder.status || {}).map(
                   ([key, value]) => (
                     <p key={key}>
@@ -522,35 +538,7 @@ export function DataTableDemo() {
 
               <div>
                 <h3 className="font-semibold mb-2">Other Info</h3>
-                <p>
-                  <strong>Customer Coordinates:</strong>{" "}
-                  {selectedOrder.customerCoordinates?.lat},{" "}
-                  {selectedOrder.customerCoordinates?.long}
-                </p>
-                <p>
-                  <strong>Store Coordinates:</strong>{" "}
-                  {selectedOrder.storeCoordinates?.lat},{" "}
-                  {selectedOrder.storeCoordinates?.long}
-                </p>
-                <p>
-                  <strong>Distance Travelled:</strong>{" "}
-                  {selectedOrder.customerCoordinates?.lat &&
-                  selectedOrder.storeCoordinates?.lat
-                    ? `${getDistanceFromLatLon(
-                        {
-                          lat1: Number(selectedOrder.customerCoordinates.long),
-                          lon1: Number(selectedOrder.customerCoordinates.lat),
-                        },
-                        {
-                          lat2: Number(selectedOrder.storeCoordinates.lat),
-                          lon2: Number(selectedOrder.storeCoordinates.long),
-                        }
-                      ).toFixed(2)} km`
-                    : "-"}
-                </p>
-                <p>
-                  <strong>Store ID:</strong> {selectedOrder.storeId}
-                </p>
+               
                 <p>
                   <strong>User ID:</strong> {selectedOrder.userId}
                 </p>

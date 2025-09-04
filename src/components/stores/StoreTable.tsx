@@ -105,7 +105,7 @@ function StoreTable() {
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Email</TableHead>
+
               <TableHead>Location</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Featured</TableHead>
@@ -138,7 +138,7 @@ function StoreTable() {
                     <TableCell>{store.name}</TableCell>
                     <TableCell>{store.category}</TableCell>
                     <TableCell>{store.phone}</TableCell>
-                    <TableCell>{store.email}</TableCell>
+                   
                     <TableCell>{store.location}</TableCell>
                     <TableCell>
                       {store.isBlocked

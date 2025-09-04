@@ -124,7 +124,7 @@ export function CancelledOrdersBox() {
                       <TableCell>
                         {order.products.map((p) => p.name).join(", ")}
                       </TableCell>
-                      <TableCell>{order.userId}</TableCell>
+                      <TableCell>{order.customerDetails.phone}</TableCell>
                       <TableCell>{format(date, "dd MMM yyyy")}</TableCell>
                     </TableRow>
                   )
