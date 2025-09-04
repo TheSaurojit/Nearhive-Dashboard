@@ -172,7 +172,7 @@ export function DataTableDemo() {
         deliveryTime,
         product: product.name,
         store: order.storename || order.storeId,
-        customer: customerName, // ✅ new column
+       customer: order.customerDetails?.name || "-", 
         status: latestStatusKey || "-",
         payment: order.paymentMethod || "-",
         total: order.totalAmount || 0,
@@ -353,53 +353,98 @@ export function DataTableDemo() {
         </Button>
       </div>
 
-      {/* Order Details Sheet */}
-      {selectedOrder && (
-        <Sheet open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
-          <SheetContent className="overflow-y-auto w-full h-full sm:w-[600px] sm:h-auto px-6 sm:px-8">
-            <SheetHeader>
-              <SheetTitle>Order Details</SheetTitle>
-            </SheetHeader>
-            <div className="mt-4 space-y-6 text-sm">
-              <div>
-                <h3 className="font-semibold mb-2">Order Details</h3>
-                <p><strong>Order ID:</strong> {selectedOrder.orderId}</p>
-                <p><strong>Payment Method:</strong> {selectedOrder.paymentMethod}</p>
-                <div>
-                  <strong>Products:</strong>
-                  <ul className="ml-4 mt-1 list-disc">
-                    {selectedOrder.products.map((prd, idx) => (
-                      <li key={idx}>{prd.name} ({prd.variant || "-"}) x {prd.quantity} - ₹{prd.price}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Price Details</h3>
-                <p><strong>Platform Fee:</strong> ₹{selectedOrder.platformFee}</p>
-                <p><strong>Delivery Fee:</strong> ₹{selectedOrder.deliveryFee}</p>
-                <p><strong>Total Amount:</strong> ₹{selectedOrder.totalAmount}</p>
-                <p><strong>Store Commission:</strong> ₹{selectedOrder.commission}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Order Timeline</h3>
-                <p><strong>Ordered:</strong> {format(toDate(selectedOrder.orderAt), "PPP p")}</p>
-                {Object.entries(selectedOrder.status || {}).map(([key, value]) => (
-                  <p key={key}><strong className="capitalize">{key}:</strong> {format(toDate(value.timestamp), "PPP p")} ({value.message})</p>
-                ))}
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Other Info</h3>
-                <p><strong>Customer Coordinates:</strong> {selectedOrder.customerCoordinates?.lat}, {selectedOrder.customerCoordinates?.long}</p>
-                <p><strong>Store Coordinates:</strong> {selectedOrder.storeCoordinates?.lat}, {selectedOrder.storeCoordinates?.long}</p>
-                <p><strong>Distance Travelled:</strong> {selectedOrder.customerCoordinates?.lat && selectedOrder.storeCoordinates?.lat ? `${getDistanceFromLatLon(Number(selectedOrder.customerCoordinates.lat), Number(selectedOrder.customerCoordinates.long), Number(selectedOrder.storeCoordinates.lat), Number(selectedOrder.storeCoordinates.long)).toFixed(2)} km` : "-"}</p>
-                <p><strong>Store ID:</strong> {selectedOrder.storeId}</p>
-                <p><strong>User ID:</strong> {selectedOrder.userId}</p>
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
+      
+{selectedOrder && (
+  <Sheet
+    open={!!selectedOrder}
+    onOpenChange={(open) => !open && setSelectedOrder(null)}
+  >
+    <SheetContent className="overflow-y-auto w-full h-full sm:w-[600px] sm:h-auto px-6 sm:px-8">
+      <SheetHeader>
+        <SheetTitle>Order Details</SheetTitle>
+      </SheetHeader>
+      <div className="mt-4 space-y-6 text-sm">
+        <div>
+          <h3 className="font-semibold mb-2">Order Details</h3>
+          <p><strong>Order ID:</strong> {selectedOrder.orderId}</p>
+          <p><strong>Payment Method:</strong> {selectedOrder.paymentMethod}</p>
+          <div>
+            <strong>Products:</strong>
+            <ul className="ml-4 mt-1 list-disc">
+              {selectedOrder.products.map((prd, idx) => (
+                <li key={idx}>
+                  {prd.name} ({prd.variant || "-"}) x {prd.quantity} - ₹{prd.price}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+       
+        <div>
+          <h3 className="font-semibold mb-2">Customer Info</h3>
+          <p><strong>Name:</strong> {selectedOrder.customerDetails?.name}</p>
+          <p><strong>Address Line 1:</strong> {selectedOrder.customerDetails?.addressLine1}</p>
+          <p><strong>Address Line 2:</strong> {selectedOrder.customerDetails?.addressLine2}</p>
+          <p><strong>Phone:</strong> {selectedOrder.customerDetails?.phone}</p>
+          <p><strong>Pincode:</strong> {selectedOrder.customerDetails?.pincode}</p>
+          <p><strong>Type:</strong> {selectedOrder.customerDetails?.type}</p>
+        </div>
+
+        <div>
+          <h3 className="font-semibold mb-2">Price Details</h3>
+          <p><strong>Platform Fee:</strong> ₹{selectedOrder.platformFee}</p>
+          <p><strong>Delivery Fee:</strong> ₹{selectedOrder.deliveryFee}</p>
+          <p><strong>Total Amount:</strong> ₹{selectedOrder.totalAmount}</p>
+          <p><strong>Store Commission:</strong> ₹{selectedOrder.commission}</p>
+        </div>
+
+        <div>
+          <h3 className="font-semibold mb-2">Order Timeline</h3>
+          <p>
+            <strong>Ordered:</strong>{" "}
+            {format(toDate(selectedOrder.orderAt), "PPP p")}
+          </p>
+          {Object.entries(selectedOrder.status || {}).map(([key, value]) => (
+            <p key={key}>
+              <strong className="capitalize">{key}:</strong>{" "}
+              {format(toDate(value.timestamp), "PPP p")} ({value.message})
+            </p>
+          ))}
+        </div>
+
+        <div>
+          <h3 className="font-semibold mb-2">Other Info</h3>
+          <p>
+            <strong>Customer Coordinates:</strong>{" "}
+            {selectedOrder.customerCoordinates?.lat},{" "}
+            {selectedOrder.customerCoordinates?.long}
+          </p>
+          <p>
+            <strong>Store Coordinates:</strong>{" "}
+            {selectedOrder.storeCoordinates?.lat},{" "}
+            {selectedOrder.storeCoordinates?.long}
+          </p>
+          <p>
+            <strong>Distance Travelled:</strong>{" "}
+            {selectedOrder.customerCoordinates?.lat &&
+            selectedOrder.storeCoordinates?.lat
+              ? `${getDistanceFromLatLon(
+                  Number(selectedOrder.customerCoordinates.lat),
+                  Number(selectedOrder.customerCoordinates.long),
+                  Number(selectedOrder.storeCoordinates.lat),
+                  Number(selectedOrder.storeCoordinates.long)
+                ).toFixed(2)} km`
+              : "-"}
+          </p>
+          <p><strong>Store ID:</strong> {selectedOrder.storeId}</p>
+          <p><strong>User ID:</strong> {selectedOrder.userId}</p>
+        </div>
+      </div>
+    </SheetContent>
+  </Sheet>
+)}
+
     </div>
   );
 }

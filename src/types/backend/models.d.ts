@@ -1,6 +1,5 @@
 import { Timestamp } from "firebase/firestore"; // Use this if using Firestore
 
-
 // type for store
 export type Store = {
   accountHolderName: string;
@@ -17,7 +16,7 @@ export type Store = {
   isPaused: boolean;
   location: string;
   logoUrl: string;
-  bannerUrl : string ;
+  bannerUrl: string;
   name: string;
   ownerId: string;
   phone: string;
@@ -28,14 +27,14 @@ export type Store = {
     lat: number;
     long: number;
   };
-}
+};
 
 // type for campaign
 export type Campaign = {
   title: string;
-  imageUrls : string[]
-  productIds: string[]
-}
+  imageUrls: string[];
+  productIds: string[];
+};
 
 // type for middlemen
 export type Middlemen = {
@@ -63,8 +62,8 @@ export type Middlemen = {
 // type for user
 export type User = {
   uid: string;
-  isCreator : boolean ;
-  isWaiting : boolean ;
+  isCreator: boolean;
+  isWaiting: boolean;
   address: string[]; // Array of address strings
   createdAt: Timestamp; // Firestore timestamp or ISO string
   email: string;
@@ -78,7 +77,7 @@ export type User = {
   storeId: string | null;
 };
 
-//type for cuisine 
+//type for cuisine
 type CuisineProduct = {
   imageUrl: string;
   title: string;
@@ -93,9 +92,8 @@ export type Cuisine = {
   banner: string;
   subHeading: string;
   about: string;
-  products: CuisineProduct[]
+  products: CuisineProduct[];
 };
-
 
 // type for orders
 type OrderStatusStep = {
@@ -104,7 +102,7 @@ type OrderStatusStep = {
 };
 
 export type Order = {
-  id : string ;
+  id: string;
   commission: number;
   couponCode: string;
   couponDiscount: number;
@@ -112,7 +110,15 @@ export type Order = {
   customerCoordinates: {
     lat: number;
     long: number;
-  }
+  };
+  customerDetails: {
+    addressLine1: string;
+    addressLine2: string;
+    name: string;
+    phone: string;
+    pincode: string;
+    type: string;
+  };
   deliveryFee: number;
   isDeliveryFeeOff: boolean;
   isPlatformFeeOff: boolean;
@@ -138,7 +144,7 @@ export type Order = {
     prepared?: OrderStatusStep;
     delivered?: OrderStatusStep;
     cancelled?: OrderStatusStep;
-  },
+  };
   storeCoordinates: {
     lat: number;
     long: number;
@@ -148,7 +154,6 @@ export type Order = {
   totalAmount: number;
   userId: string;
 };
-
 
 // type for products
 type ProductVariation = {
@@ -171,13 +176,12 @@ export type Product = {
   productId: string;
   storeCategory: string;
   storeId: string;
-  type: 'veg' | 'nonVeg'; // can be a union if only these values exist
+  type: "veg" | "nonVeg"; // can be a union if only these values exist
   variations: {
     [key: string]: ProductVariation; // dynamic keys like "half", "full"
   };
   rating: number;
 };
-
 
 // type for blogs
 export type Blog = {
@@ -187,7 +191,7 @@ export type Blog = {
   description: string;
   content: string;
   createdAt: Timestamp; // ISO date string
-}
+};
 
 //type for hive creators request
 export type CreatorsWaitinglist = {
@@ -200,25 +204,24 @@ export type CreatorsWaitinglist = {
   social: string;
   store: string;
   userId: string;
-}
+};
 
 //type for featured stores
 export type FeaturedStores = {
-    stores: string[]
-}
+  stores: string[];
+};
 
 // type for food playlist
 export type FoodPlaylist = {
-  image : string ;
-  productIds : string[] ;
-  text : string ;
-}
-
+  image: string;
+  productIds: string[];
+  text: string;
+};
 
 // type for middlemen earning
 export type MiddlemenEarning = {
-    amount: number;
-    date: string;
-    earning: number;
-    orderId: string;
-}
+  amount: number;
+  date: string;
+  earning: number;
+  orderId: string;
+};
