@@ -143,6 +143,7 @@ export type Order = {
     assigned?: OrderStatusStep;
     prepared?: OrderStatusStep;
     delivered?: OrderStatusStep;
+    delivering?: OrderStatusStep;
     cancelled?: OrderStatusStep;
   };
   storeCoordinates: {
