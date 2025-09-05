@@ -204,6 +204,7 @@ export function DataTableDemo() {
         store: order.storename || order.storeId,
         customer: order.customerDetails?.name || "-",
         status: latestStatusKey || "-",
+        middleman : order.providedMiddlemen?.name || 'N/A',
         payment: order.paymentMethod || "-",
         total: order.totalAmount || 0,
         platformFee: order.platformFee || 0,
@@ -246,6 +247,8 @@ export function DataTableDemo() {
     { accessorKey: "product", header: "Product" },
     { accessorKey: "store", header: "Store" },
     { accessorKey: "customer", header: "Customer" },
+    { accessorKey: "middleman", header: "Middleman" },
+
     {
       accessorKey: "status",
       header: "Status",

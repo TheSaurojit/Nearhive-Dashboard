@@ -119,6 +119,16 @@ export type Order = {
     pincode: string;
     type: string;
   };
+
+  providedMiddlemen?: {
+    acceptedAt: Timestamp; // timestamp
+    fcmToken: string;
+    middlemanId: string;
+    name: string;
+    phone: string;
+  };
+
+
   deliveryFee: number;
   isDeliveryFeeOff: boolean;
   isPlatformFeeOff: boolean;
