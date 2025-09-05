@@ -135,15 +135,19 @@ export function DataTableDemo() {
         price: 0,
       };
 
-      const latestStatusKey = (
-        Object.keys(order.status || {}) as (keyof typeof order.status)[]
-      )
-        .sort(
-          (a, b) =>
-            toDate(order.status[a]?.timestamp).getTime() -
-            toDate(order.status[b]?.timestamp).getTime()
-        )
-        .pop();
+      const statusPriority: (keyof typeof order.status)[] = [
+  "cancelled",
+  "delivered",
+  "delivering",
+  "assigned",
+  "prepared",
+  "accepted",
+  "ordered",
+];
+
+const latestStatusKey =
+  statusPriority.find((key) => order.status?.[key]) || "-";
+
 
       const orderDate = toDate(order.orderAt);
 
