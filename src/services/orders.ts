@@ -8,41 +8,52 @@ export async function fetchOrders() {
     return docs as Order[]
 }
 
+type StatusType = "delivered" | "cancelled";
 
-export async function cancelOrder(orderId: string) {
-
-    const docArray = await FirestoreService.getByConditions("Orders", [
+export async function cancelOrder(orderId: string, statusType: StatusType) {
+    const docArray = (await FirestoreService.getByConditions("Orders", [
         {
-            field: 'orderId',
-            operator: '==',
-            value: orderId
-        }
-    ]) as Order[]
+            field: "orderId",
+            operator: "==",
+            value: orderId,
+        },
+    ])) as Order[];
 
-    const doc = docArray[0] ?? null
+    const doc = docArray[0] ?? null;
 
     if (!doc) {
         return;
     }
 
-    const docId = doc.id
+    const docId = doc.id;
 
-    const status = {
-        ...doc.status
-        ,
-        cancelled: {
-            'message': "Order is cancelled",
-            'timestamp': Timestamp.now()
-        }
+    let updatedStatus = { ...doc.status };
+
+    if (statusType === "cancelled") {
+        updatedStatus = {
+            ...updatedStatus,
+            cancelled: {
+                message: "Order is cancelled",
+                timestamp: Timestamp.now(),
+            },
+        };
+        delete updatedStatus.delivered; // remove delivered if present
+    } else if (statusType === "delivered") {
+        updatedStatus = {
+            ...updatedStatus,
+            delivered: {
+                message: "Order is delivered",
+                timestamp: Timestamp.now(),
+            },
+        };
+        delete updatedStatus.cancelled; // remove cancelled if present
     }
 
     await FirestoreService.updateDoc("Orders", docId, {
-        status
-    })
-
-
-
+        status: updatedStatus,
+    });
 }
+
 
 // import { db } from "@/firebase/firebase-client";
 // import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
