@@ -127,23 +127,31 @@ export function DataTableDemo() {
   }, [usersData]);
 
   const formattedOrders = React.useMemo(() => {
+    
     return ordersData.map((order: Order) => {
       const product = order.products?.[0] || {
         name: "-",
         variant: "-",
         quantity: 1,
         price: 0,
+     temp: order.totalAmount < 100 ? "Free" : "-",
+
+
       };
 
-      const latestStatusKey = (
-        Object.keys(order.status || {}) as (keyof typeof order.status)[]
-      )
-        .sort(
-          (a, b) =>
-            toDate(order.status[a]?.timestamp).getTime() -
-            toDate(order.status[b]?.timestamp).getTime()
-        )
-        .pop();
+      const statusPriority: (keyof typeof order.status)[] = [
+  "cancelled",
+  "delivered",
+  "delivering",
+  "assigned",
+  "prepared",
+  "accepted",
+  "ordered",
+];
+
+const latestStatusKey =
+  statusPriority.find((key) => order.status?.[key]) || "-";
+
 
       const orderDate = toDate(order.orderAt);
 
@@ -210,6 +218,7 @@ export function DataTableDemo() {
         platformFee: order.platformFee || 0,
         deliveryFee: order.deliveryFee || 0,
         storeCommission: order.commission || 0,
+          temp: order.totalAmount < 100 ? "Free" : "-",
         distance,
         orderRaw: order,
         userRaw: user,
@@ -264,6 +273,17 @@ export function DataTableDemo() {
         <div className="text-right font-medium">₹{row.getValue("total")}</div>
       ),
     },
+{
+  accessorKey: "temp",
+  header: "Temp",
+  cell: ({ row }) => (
+    <div className="text-center font-semibold text-green-600">
+      {row.getValue("temp")}
+    </div>
+  ),
+},
+
+
     {
       id: "actions",
       enableHiding: false,

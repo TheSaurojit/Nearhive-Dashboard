@@ -148,13 +148,13 @@ export type Order = {
     variant: string;
   }[];
   status: {
-    ordered?: OrderStatusStep;
     cancelled?: OrderStatusStep;
-    accepted?: OrderStatusStep;
-    prepared?: OrderStatusStep;
-    assigned?: OrderStatusStep;
-    delivering?: OrderStatusStep;
     delivered?: OrderStatusStep;
+    delivering?: OrderStatusStep;
+    assigned?: OrderStatusStep;
+    prepared?: OrderStatusStep;
+    accepted?: OrderStatusStep;
+    ordered?: OrderStatusStep;
   };
   storeCoordinates: {
     lat: number;
