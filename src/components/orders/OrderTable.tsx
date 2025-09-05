@@ -127,12 +127,16 @@ export function DataTableDemo() {
   }, [usersData]);
 
   const formattedOrders = React.useMemo(() => {
+    
     return ordersData.map((order: Order) => {
       const product = order.products?.[0] || {
         name: "-",
         variant: "-",
         quantity: 1,
         price: 0,
+     temp: order.totalAmount < 100 ? "Free" : "-",
+
+
       };
 
       const statusPriority: (keyof typeof order.status)[] = [
@@ -214,6 +218,7 @@ const latestStatusKey =
         platformFee: order.platformFee || 0,
         deliveryFee: order.deliveryFee || 0,
         storeCommission: order.commission || 0,
+          temp: order.totalAmount < 100 ? "Free" : "-",
         distance,
         orderRaw: order,
         userRaw: user,
@@ -268,6 +273,17 @@ const latestStatusKey =
         <div className="text-right font-medium">₹{row.getValue("total")}</div>
       ),
     },
+{
+  accessorKey: "temp",
+  header: "Temp",
+  cell: ({ row }) => (
+    <div className="text-center font-semibold text-green-600">
+      {row.getValue("temp")}
+    </div>
+  ),
+},
+
+
     {
       id: "actions",
       enableHiding: false,
