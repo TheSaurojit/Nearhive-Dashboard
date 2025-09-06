@@ -36,12 +36,14 @@ export async function updateOrderStatus(orderId: string, statusType: StatusType)
             assigned: false,
             isOrderOngoing: false,
             providedMiddlemen: deleteField(),
-            "status.accepted": deleteField(),
-            "status.prepared": deleteField(),
-            "status.assigned": deleteField(),
-            "status.delivering": deleteField(),
-            "status.delivered": deleteField(),
+
             status: {
+                accepted: deleteField(),
+                prepared: deleteField(),
+                assigned: deleteField(),
+                delivering: deleteField(),
+                delivered: deleteField(),
+
                 ordered: data.status.ordered,
                 cancelled: {
                     message: "Order was cancelled",
@@ -64,9 +66,12 @@ export async function updateOrderStatus(orderId: string, statusType: StatusType)
     if (statusType === "delivered") {
         await FirestoreService.updateDoc("Orders", docId, {
             isOrderOngoing: false,
-            "status.delivered": {
-                message: "Order delivered successfully",
-                timestamp: new Date(),
+            status: {
+                ordered: data.status.ordered,
+                delivered: {
+                    message: "Order delivered successfully",
+                    timestamp: new Date(),
+                }
             },
         });
     }

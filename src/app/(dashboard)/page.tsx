@@ -52,16 +52,7 @@ export default async function page() {
     // console.log("Delivered Orders", deliveredOrders.length);
 
 
-    //   const cutoffDate = new Date("2025-08-05T02:12:20+05:30"); // Your cutoff date
-
-    //  const orders =  await FirestoreService.getByConditions(
-    //     "Orders",
-    //     [
-    //       { field: "couponCode", operator: "==", value: "" }, // condition
-    //     ]
-    //   );
-
-    //   console.log(orders);
+   
   };
 
   useEffect(() => {
