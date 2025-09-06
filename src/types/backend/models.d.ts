@@ -69,6 +69,7 @@ export type User = {
   email: string;
   firstName: string;
   lastName: string;
+  fcmToken: string;
   lastUpdated: Timestamp; // Firestore timestamp or ISO string
   likedPosts: string[]; // Array of post IDs or titles
   location: string;

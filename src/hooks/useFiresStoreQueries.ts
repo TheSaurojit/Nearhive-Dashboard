@@ -126,7 +126,9 @@ export function useFeaturedStoresQuery() {
         queryKey: ["featuredStores"],
         queryFn: fetchFeaturedStores ,
         refetchOnWindowFocus : false ,
-        refetchOnMount : false ,
+        refetchOnMount : true ,
+        refetchInterval : 7000
+
     });
 }
 
