@@ -37,3 +37,16 @@ export async function makeStoreInActive(storeId: string) {
         isActive: false
     })
 }
+
+
+export async function makeStorePause(storeId: string) {
+    await FirestoreService.updateDoc("Stores", storeId, {
+        isPaused : true
+    })
+}
+
+export async function makeStoreUnPause(storeId: string) {
+    await FirestoreService.updateDoc("Stores", storeId, {
+        isPaused : false
+    })
+}
