@@ -55,7 +55,7 @@ import {
 const items = [
   { title: "Home", url: "/", icon: Home },
   { title: "Orders", url: "/orders", icon: Inbox },
-  { title: "Cancel Orders", url: "/cancel-order", icon: Inbox },
+  { title: "Update Order Status", url: "/update-order-status", icon: Inbox },
 
   { title: "Middleman", url: "/middleman", icon: Truck },
   { title: "Customers", url: "/customers", icon: User },

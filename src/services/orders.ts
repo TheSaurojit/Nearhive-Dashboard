@@ -1,6 +1,7 @@
+import { db } from "@/firebase/firebase-client";
 import { FirestoreService } from "@/firebase/firestoreService";
 import { Order } from "@/types/backend/models";
-import { Timestamp } from "firebase/firestore";
+import { deleteField, Timestamp } from "firebase/firestore";
 
 export async function fetchOrders() {
     const docs = await FirestoreService.getAllDocs("Orders")
@@ -10,7 +11,7 @@ export async function fetchOrders() {
 
 type StatusType = "delivered" | "cancelled";
 
-export async function cancelOrder(orderId: string, statusType: StatusType) {
+export async function updateOrderStatus(orderId: string, statusType: StatusType) {
     const docArray = (await FirestoreService.getByConditions("Orders", [
         {
             field: "orderId",
@@ -19,39 +20,55 @@ export async function cancelOrder(orderId: string, statusType: StatusType) {
         },
     ])) as Order[];
 
-    const doc = docArray[0] ?? null;
+    const data = docArray[0] ?? null;
 
-    if (!doc) {
+    if (!data) {
         return;
     }
 
-    const docId = doc.id;
+    const docId = data.id
 
-    let updatedStatus = { ...doc.status };
 
     if (statusType === "cancelled") {
-        updatedStatus = {
-            ...updatedStatus,
-            cancelled: {
-                message: "Order is cancelled",
-                timestamp: Timestamp.now(),
+        await FirestoreService.updateDoc("Orders", docId, {
+            assigned: false,
+            isOrderOngoing: false,
+            providedMiddlemen: deleteField(),
+            "status.accepted": deleteField(),
+            "status.prepared": deleteField(),
+            "status.assigned": deleteField(),
+            "status.delivering": deleteField(),
+            "status.delivered": deleteField(),
+            status: {
+                ordered: data.status.ordered,
+                cancelled: {
+                    message: "Order was cancelled",
+                    timestamp: new Date(),
+                }
             },
-        };
-        delete updatedStatus.delivered; // remove delivered if present
-    } else if (statusType === "delivered") {
-        updatedStatus = {
-            ...updatedStatus,
-            delivered: {
-                message: "Order is delivered",
-                timestamp: Timestamp.now(),
-            },
-        };
-        delete updatedStatus.cancelled; // remove cancelled if present
+        });
     }
 
-    await FirestoreService.updateDoc("Orders", docId, {
-        status: updatedStatus,
-    });
+    if (statusType === "delivered") {
+        await FirestoreService.updateDoc("Orders", docId, {
+            isOrderOngoing: false,
+            "status.delivered": {
+                message: "Order delivered successfully",
+                timestamp: new Date(),
+            },
+        });
+    }
+
+    console.log(data, "dt");
+
+
+
+    // const res = await fetch('/api/notify')
+
+    // console.log(res);
+
+
+
 }
 
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { cancelOrder } from "@/services/orders";
+import {  updateOrderStatus } from "@/services/orders";
 import React, { useState } from "react";
 
 type StatusType = "delivered" | "cancelled";
@@ -16,7 +16,7 @@ const OrderPage: React.FC = () => {
       return;
     }
 
-    await cancelOrder(orderId, status); // ✅ now type-safe
+    await updateOrderStatus(orderId, status); // ✅ now type-safe
     alert(`Order marked as ${status}`);
 
     console.log("Submitted Order:", { orderId, status });

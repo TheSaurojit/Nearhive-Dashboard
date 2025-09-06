@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import { getMessaging } from 'firebase-admin/messaging';
 
 // Initialize Firebase Admin SDK
 const initializeFirebaseAdmin = () => {
@@ -26,3 +27,6 @@ initializeFirebaseAdmin();
 // Export the services you need
 export const adminAuth = getAuth();
 export const adminDb = getFirestore();
+export const adminMessage = getMessaging();
+
+
