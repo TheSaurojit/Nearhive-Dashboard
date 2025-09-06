@@ -242,6 +242,10 @@ const latestStatusKey =
     });
   }, [formattedOrders, selectedDate, debouncedSearch]);
   // ✅ Total orders already available from filteredData.length
+// ✅ Calculate totals
+const totalOrders = filteredData.length;
+const deliveredOrders = filteredData.filter(o => o.status === "delivered").length;
+const cancelledOrders = filteredData.filter(o => o.status === "cancelled").length;
 
 // ✅ Count orders per date
 const ordersPerDate = React.useMemo(() => {
@@ -271,12 +275,19 @@ const ordersPerDate = React.useMemo(() => {
     { accessorKey: "middleman", header: "Middleman" },
 
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("status")}</div>
-      ),
-    },
+  accessorKey: "status",
+  header: "Status",
+  cell: ({ row }) => {
+    const status = row.getValue("status") as string;
+    let colorClass = "";
+    if (status === "delivered") colorClass = "text-green-600 font-semibold";
+    else if (status === "cancelled") colorClass = "text-red-600 font-semibold";
+    else if (status === "delivering") colorClass = "text-yellow-600 font-semibold";
+
+    return <div className={cn("capitalize", colorClass)}>{status}</div>;
+  },
+},
+
     { accessorKey: "payment", header: "Payment" },
     {
       accessorKey: "total",
@@ -405,11 +416,18 @@ const ordersPerDate = React.useMemo(() => {
         </DropdownMenu>
       </div>
 {/* ✅ Order Count Summary */}
-<div className="mb-4 flex flex-col gap-2">
-  <p className="text-sm font-medium ml-2">
-    Total Orders: <span className="font-bold">{filteredData.length}</span>
+<div className="mb-4 flex flex-wrap gap-4 ml-2">
+  <p className="text-sm font-medium">
+    Total Orders: <span className="font-bold">{totalOrders}</span>
+  </p>
+  <p className="text-sm font-medium">
+    Delivered: <span className="font-bold">{deliveredOrders}</span>
+  </p>
+  <p className="text-sm font-medium">
+    Cancelled: <span className="font-bold">{cancelledOrders}</span>
   </p>
 </div>
+
 
       {/* Table */}
       <div className="rounded-md border">
