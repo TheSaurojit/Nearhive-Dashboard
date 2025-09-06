@@ -1,6 +1,6 @@
 import { db } from "@/firebase/firebase-client";
 import { FirestoreService } from "@/firebase/firestoreService";
-import { Order } from "@/types/backend/models";
+import { Order, User } from "@/types/backend/models";
 import { deleteField, Timestamp } from "firebase/firestore";
 
 export async function fetchOrders() {
@@ -30,6 +30,8 @@ export async function updateOrderStatus(orderId: string, statusType: StatusType)
 
 
     if (statusType === "cancelled") {
+
+
         await FirestoreService.updateDoc("Orders", docId, {
             assigned: false,
             isOrderOngoing: false,
@@ -47,6 +49,16 @@ export async function updateOrderStatus(orderId: string, statusType: StatusType)
                 }
             },
         });
+
+        const userId = data.userId
+
+        const user = await FirestoreService.getDoc("Users", userId) as User
+
+        fetch(`/api/notify?fcmToken=${encodeURIComponent(user.fcmToken)}`, {
+            method: "GET",
+        }).catch((err) => {
+            console.error("Notification failed:", err);
+        });
     }
 
     if (statusType === "delivered") {
@@ -59,13 +71,8 @@ export async function updateOrderStatus(orderId: string, statusType: StatusType)
         });
     }
 
-    console.log(data, "dt");
 
 
-
-    // const res = await fetch('/api/notify')
-
-    // console.log(res);
 
 
 
