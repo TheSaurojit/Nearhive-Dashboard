@@ -127,6 +127,8 @@ export function useFeaturedStoresQuery() {
         queryFn: fetchFeaturedStores ,
         refetchOnWindowFocus : false ,
         refetchOnMount : true ,
+        refetchInterval : 7000
+
     });
 }
 
