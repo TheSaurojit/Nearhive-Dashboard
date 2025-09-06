@@ -218,7 +218,7 @@ const latestStatusKey =
         platformFee: order.platformFee || 0,
         deliveryFee: order.deliveryFee || 0,
         storeCommission: order.commission || 0,
-          temp: order.totalAmount < 100 ? "Free" : "-",
+       temp: order.isCampaign ? "Free" : "-",
         distance,
         orderRaw: order,
         userRaw: user,
@@ -241,6 +241,18 @@ const latestStatusKey =
       );
     });
   }, [formattedOrders, selectedDate, debouncedSearch]);
+  // ✅ Total orders already available from filteredData.length
+
+// ✅ Count orders per date
+const ordersPerDate = React.useMemo(() => {
+  const counts: Record<string, number> = {};
+  filteredData.forEach((order) => {
+    const dateKey = format(toDate(order.ordered), "yyyy-MM-dd");
+    counts[dateKey] = (counts[dateKey] || 0) + 1;
+  });
+  return counts;
+}, [filteredData]);
+
 
   const columns: ColumnDef<any>[] = [
     { accessorKey: "id", header: "Order ID" },
@@ -275,7 +287,7 @@ const latestStatusKey =
     },
 {
   accessorKey: "temp",
-  header: "Temp",
+  header: "isFree",
   cell: ({ row }) => (
     <div className="text-center font-semibold text-green-600">
       {row.getValue("temp")}
@@ -392,6 +404,12 @@ const latestStatusKey =
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+{/* ✅ Order Count Summary */}
+<div className="mb-4 flex flex-col gap-2">
+  <p className="text-sm font-medium ml-2">
+    Total Orders: <span className="font-bold">{filteredData.length}</span>
+  </p>
+</div>
 
       {/* Table */}
       <div className="rounded-md border">

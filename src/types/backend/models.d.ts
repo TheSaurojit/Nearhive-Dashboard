@@ -104,6 +104,7 @@ type OrderStatusStep = {
 export type Order = {
   id: string;
   commission: number;
+  isCampaign:boolean;
   couponCode: string;
   couponDiscount: number;
   couponID: string;

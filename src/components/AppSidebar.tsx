@@ -21,6 +21,7 @@ import {
   StoreIcon,
   Music,
   VideoIcon,
+  BadgeIndianRupee,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +56,7 @@ import {
 const items = [
   { title: "Home", url: "/", icon: Home },
   { title: "Orders", url: "/orders", icon: Inbox },
+  { title: "Store Earnings", url: "/storeearnings", icon: BadgeIndianRupee },
   { title: "Update Order Status", url: "/update-order-status", icon: Inbox },
 
   { title: "Middleman", url: "/middleman", icon: Truck },
