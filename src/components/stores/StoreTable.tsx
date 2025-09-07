@@ -23,7 +23,7 @@ import {
   addToFeaturedStores,
   removeFromFeaturedStores,
 } from "@/services/featuredStores"
-import { makeStoreActive, makeStoreInActive } from "@/services/stores" 
+import { makeStoreActive, makeStoreInActive, makeStorePause, makeStoreUnPause } from "@/services/stores"
 import EditLogosDialog from "./EditLogosDialog"
 
 const ITEMS_PER_PAGE = 10
@@ -57,25 +57,35 @@ function StoreTable() {
     currentPage * ITEMS_PER_PAGE
   )
 
+  const handleToggleActive = async (store: Store, newValue: boolean) => {
+    try {
+      if (newValue) await makeStoreActive(store.storeId)
+      else await makeStoreInActive(store.storeId)
+      await refetchStores()
+      setManageStore((prev) => prev ? { ...prev, isActive: newValue } : prev)
+    } catch {
+      alert("Error updating store state")
+    }
+  }
+
+  const handleTogglePause = async (store: Store, newValue: boolean) => {
+    try {
+      if (newValue) await makeStorePause(store.storeId)
+      else await makeStoreUnPause(store.storeId)
+      await refetchStores()
+      setManageStore((prev) => prev ? { ...prev, isPaused: newValue } : prev)
+    } catch {
+      alert("Error updating pause state")
+    }
+  }
+
   const handleToggleFeatured = async (storeId: string, isNowFeatured: boolean) => {
     try {
       if (isNowFeatured) await addToFeaturedStores(storeId)
       else await removeFromFeaturedStores(storeId)
       refetchFeatured()
-    } catch (err) {
+    } catch {
       alert("Error updating featured status")
-    }
-  }
-
-  const handleToggleActive = async (store: Store, newValue: boolean) => {
-    try {
-      if (newValue) await makeStoreActive(store.storeId)
-      else await makeStoreInActive(store.storeId)
-
-      await refetchStores()
-      setManageStore((prev) => prev ? { ...prev, isActive: newValue } : prev)
-    } catch (err) {
-      alert("Error updating store state")
     }
   }
 
@@ -105,9 +115,9 @@ function StoreTable() {
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Phone</TableHead>
-
               <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Store State</TableHead>
+              <TableHead>Store Pause</TableHead>
               <TableHead>Featured</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
@@ -138,23 +148,27 @@ function StoreTable() {
                     <TableCell>{store.name}</TableCell>
                     <TableCell>{store.category}</TableCell>
                     <TableCell>{store.phone}</TableCell>
-                   
                     <TableCell>{store.location}</TableCell>
+
+                    {/* Store State */}
                     <TableCell>
-                      {store.isBlocked
-                        ? "Blocked"
-                        : store.isPaused
-                        ? "Paused"
-                        : store.isActive
-                        ? "Active"
-                        : "Inactive"}
+                      {store.isActive ? "Open" : "Closed"}
                     </TableCell>
+
+                    {/* Store Pause */}
+                    <TableCell>
+                      {store.isPaused ? "Paused" : "Unpaused"}
+                    </TableCell>
+
+                    {/* Featured */}
                     <TableCell>
                       <Switch
                         checked={isFeatured}
                         onCheckedChange={(c) => handleToggleFeatured(store.storeId, c)}
                       />
                     </TableCell>
+
+                    {/* Actions */}
                     <TableCell className="space-x-2">
                       <Button size="sm" onClick={() => setEditStoreId(store.storeId)}>
                         Edit Logos
@@ -209,12 +223,19 @@ function StoreTable() {
           </SheetHeader>
 
           {manageStore && (
-            <div className="py-4">
+            <div className="py-4 space-y-4 px-4">
               <div className="flex items-center justify-between">
                 <span>Store State</span>
                 <Switch
                   checked={manageStore.isActive}
                   onCheckedChange={(c) => handleToggleActive(manageStore, c)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Store Pause</span>
+                <Switch
+                  checked={manageStore.isPaused}
+                  onCheckedChange={(c) => handleTogglePause(manageStore, c)}
                 />
               </div>
             </div>
