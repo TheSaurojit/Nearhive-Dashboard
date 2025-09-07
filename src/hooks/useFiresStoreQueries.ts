@@ -19,7 +19,7 @@ export function useStoresQuery() {
         queryFn: fetchStores ,
         refetchOnWindowFocus : false ,
         refetchOnMount : true ,
-        // refetchInterval : 5000
+        refetchInterval : 5000
     });
 }
 
@@ -30,7 +30,6 @@ export function useMiddlemenQuery() {
         queryFn: fetchMiddlemen ,
         refetchOnWindowFocus : false ,
         refetchOnMount : false ,
-        // refetchInterval : 5000
     });
 }
 
@@ -41,11 +40,8 @@ export function useUsersQuery() {
         queryFn: fetchUsers ,
         refetchOnWindowFocus : false ,
         refetchOnMount : false ,
-        // refetchInterval : 5000
     });
 }
-
-
 
 
 // Hook for customers
@@ -55,7 +51,6 @@ export function useCustomersQuery() {
         queryFn: fetchCustomers ,
         refetchOnWindowFocus : false ,
         refetchOnMount : false ,
-        // refetchInterval : 5000
     });
 }
 
@@ -78,7 +73,6 @@ export function useCuisinesQuery() {
         queryFn: fetchCuisines ,
         refetchOnWindowFocus : false ,
         refetchOnMount : false ,
-        // refetchInterval : 5000
     });
 }
 
@@ -92,7 +86,6 @@ export function useCampaignsQuery() {
         queryFn: fetchCampaigns ,
         refetchOnWindowFocus : false ,
         refetchOnMount : false ,
-        // refetchInterval : 5000
     });
 }
 
@@ -103,7 +96,6 @@ export function usePendingCreatorsQuery() {
         queryFn: fetchPendingCreators ,
         refetchOnWindowFocus : false ,
         refetchOnMount : false ,
-        // refetchInterval : 5000
     });
 }
 
@@ -115,7 +107,6 @@ export function useVerifiedCreatorsQuery() {
         queryFn: fetchVerifiedCreators ,
         refetchOnWindowFocus : false ,
         refetchOnMount : true ,
-        // refetchInterval : 5000
     });
 }
 
@@ -127,7 +118,6 @@ export function useFeaturedStoresQuery() {
         queryFn: fetchFeaturedStores ,
         refetchOnWindowFocus : false ,
         refetchOnMount : true ,
-        refetchInterval : 7000
 
     });
 }
