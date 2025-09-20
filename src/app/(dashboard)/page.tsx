@@ -1,5 +1,6 @@
 "use client";
 
+import { db } from "@/firebase/firebase-client";
 import { FirestoreService } from "@/firebase/firestoreService";
 import { dump } from "@/helper/helper";
 import {
@@ -22,37 +23,44 @@ import {
   makeStoreActive,
   makeStoreInActive,
 } from "@/services/stores";
-import { Timestamp } from "firebase/firestore";
+import { Order } from "@/types/backend/models";
+import { doc, Timestamp, writeBatch } from "firebase/firestore";
 import React, { useEffect } from "react";
 
 export default async function page() {
-  const ckData = async () => {
 
+  const ckData = async () => {
     
     // const orders = await fetchOrders();
 
-    // // ✅ Filter delivered orders
-    // const deliveredOrders = orders.filter(
-    //   (order) => Object.hasOwn(order.status,"delivered")
-    // );
+    // const filteredOrders = orders.filter((order) => order.status.delivered);
 
-    // // ✅ Calculate total amount
-    // const totalAmount = deliveredOrders.reduce(
-    //   (sum, order) => sum + order.totalAmount,
-    //   0
-    // );
+    // const newOrders = filteredOrders.map((order) => {
+    //   const baseCommission =
+    //     order.products[0].price * order.products[0].quantity * 0.075;
 
-    // // ✅ Calculate average order value
-    // const averageOrderValue =
-    //   deliveredOrders.length > 0 ? totalAmount / deliveredOrders.length : 0;
+    //   const commission = Math.ceil(baseCommission);
 
-    // console.log("Total Amount:", totalAmount);
-    // console.log("Average Order Value:", averageOrderValue);
+    //   return {
+    //     orderId: order.orderId,
+    //     commission: commission,
+    //     price: order.products[0].price,
+    //     docId: order.id,
+    //   };
+    // });
 
-    // console.log("Delivered Orders", deliveredOrders.length);
+    // console.log(filteredOrders, newOrders);
+
+    // const batch = writeBatch(db);
+
+    // newOrders.forEach(({ docId, commission }) => {
+    //   const orderRef = doc(db, "Orders", docId); 
+    //   batch.update(orderRef, {commission : commission});
+    // });
+
+    // await batch.commit();
 
 
-   
   };
 
   useEffect(() => {
