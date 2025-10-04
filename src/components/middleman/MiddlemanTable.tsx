@@ -65,6 +65,10 @@ function MiddlemanTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [manageSheet, setManageSheet] = useState(false);
   const [salesDialog, setSalesDialog] = useState(false);
+    const [salesPage, setSalesPage] = useState(1);
+    const [searchQuery, setSearchQuery] = React.useState("");
+
+      const salesPerPage = 5;
   const [selectedMiddleman, setSelectedMiddleman] = useState<Middleman | null>(
     null
   );
@@ -143,18 +147,37 @@ function MiddlemanTable() {
   }, [ordersData, earnings]);
 
   // ✅ Filter by date range
- const filteredSales = useMemo(() => {
-  if (!date?.from || !date?.to) return combinedSales; // ✅ Return all if date range not set
+ // ✅ Filter by date range + search query
+const filteredSales = useMemo(() => {
+  let result = combinedSales;
 
-  return combinedSales.filter((item) => {
-    const earningDate = parseISO(item.date);
-    return isWithinInterval(earningDate, {
-      start: date.from as Date, // ✅ Now guaranteed not undefined
-      end: date.to as Date,
+  if (date?.from && date?.to) {
+    result = result.filter((item) => {
+      const earningDate = parseISO(item.date);
+      return isWithinInterval(earningDate, {
+        start: date.from as Date,
+        end: date.to as Date,
+      });
     });
-  });
-}, [combinedSales, date]);
+  }
 
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase();
+    result = result.filter((item) => {
+      const products = item.order.products.map((p) => p.name).join(", ").toLowerCase();
+      return (
+        products.includes(query) ||
+        item.orderId.toLowerCase().includes(query)
+      );
+    });
+  }
+
+  return result;
+}, [combinedSales, date, searchQuery]);
+
+
+
+  const totalSalesPages = Math.ceil(filteredSales.length / salesPerPage);
 
   // ✅ Calculate totals
   const totalOrders = filteredSales.length;
@@ -306,24 +329,48 @@ function MiddlemanTable() {
       </Sheet>
 
       {/* ✅ Track Sales Dialog */}
-      <Dialog open={salesDialog} onOpenChange={setSalesDialog}>
-        <DialogContent className="max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>Track Sales for {selectedMiddleman?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="py-2">
-            <Calendar
-              mode="range"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border"
-            />
-          </div>
-          <div className="py-2 font-semibold">
-            Total Orders: {totalOrders} | Total Revenue: ₹
-            {totalRevenue.toFixed(2)} | Total Earnings: ₹
-            {totalEarning.toFixed(2)}
-          </div>
+      {/* ✅ Track Sales Dialog */}
+{/* ✅ Track Sales Dialog */}
+{/* ✅ Track Sales Dialog */}
+{/* ✅ Track Sales Dialog */}
+<Dialog open={salesDialog} onOpenChange={setSalesDialog}>
+  <DialogContent className="!w-[75vw] !max-w-[95vw]">
+    <DialogHeader>
+      <DialogTitle>Track Sales for {selectedMiddleman?.name}</DialogTitle>
+    </DialogHeader>
+
+    <div className="grid grid-cols-[auto,1fr] gap-6 h-full py-4">
+      {/* Left Side → Calendar + Totals */}
+      <div className="flex flex-col gap-4">
+        <Calendar
+          mode="range"
+          selected={date}
+          onSelect={setDate}
+          className="rounded-md border"
+        />
+        <div className="font-semibold text-sm space-y-1">
+          <p>Total Orders: {totalOrders}</p>
+          <p>Total Revenue: ₹{totalRevenue.toFixed(2)}</p>
+          <p>Total Earnings: ₹{totalEarning.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Right Side → Sales Table + Pagination */}
+      <div className="flex flex-col h-full">
+
+  {/* 🔥 Search bar */}
+  <div className="mb-3">
+    <Input
+      placeholder="Search Products"
+      value={searchQuery}
+      onChange={(e) => {
+        setSearchQuery(e.target.value);
+        setSalesPage(1); // reset to first page on search
+      }}
+      className="w-[15vw]"
+    />
+  </div>
+        <div className="flex-1 overflow-auto border rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
@@ -337,8 +384,9 @@ function MiddlemanTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSales.length ? (
-                filteredSales.map((item, i) => (
+              {filteredSales
+                .slice((salesPage - 1) * salesPerPage, salesPage * salesPerPage)
+                .map((item, i) => (
                   <TableRow key={i}>
                     <TableCell>{format(parseISO(item.date), "dd/MM/yyyy")}</TableCell>
                     <TableCell>
@@ -356,8 +404,9 @@ function MiddlemanTable() {
                     </TableCell>
                     <TableCell>{item.orderId}</TableCell>
                   </TableRow>
-                ))
-              ) : (
+                ))}
+
+              {!filteredSales.length && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center">
                     No sales found
@@ -366,8 +415,40 @@ function MiddlemanTable() {
               )}
             </TableBody>
           </Table>
-        </DialogContent>
-      </Dialog>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex justify-between items-center pt-4">
+          <span className="text-sm text-gray-600">
+            Page {salesPage} of {totalSalesPages || 1}
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={salesPage === 1}
+              onClick={() => setSalesPage((p) => Math.max(p - 1, 1))}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={salesPage === totalSalesPages || totalSalesPages === 0}
+              onClick={() => setSalesPage((p) => Math.min(p + 1, totalSalesPages))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
+
+
+
+
     </div>
   );
 }

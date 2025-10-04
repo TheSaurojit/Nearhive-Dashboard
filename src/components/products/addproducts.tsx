@@ -8,11 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,28 +21,17 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
 import ImageUploadWithPreview from "@/components/ImageUploadWithPreview";
-import { useStoresQuery } from "@/hooks/useFiresStoreQueries"; // adjust path
-import { useCuisinesQuery } from "@/hooks/useFiresStoreQueries"; // adjust path
+
+import { useStoresQuery } from "@/hooks/useFiresStoreQueries";
+import { useCuisinesQuery } from "@/hooks/useFiresStoreQueries";
 import type { Store, Cuisine } from "@/types/backend/models";
 import { useProductsQuery } from "@/hooks/query/useProducts";
 
 const AddProducts: React.FC = () => {
   const { data: stores = [], isLoading: storeLoading } = useStoresQuery();
-  const { data: cuisines = [], isLoading: cuisinesLoading } =
-    useCuisinesQuery();
-
+  const { data: cuisines = [], isLoading: cuisinesLoading } = useCuisinesQuery();
   const { createProductMutation } = useProductsQuery();
 
   const [loading, setLoading] = useState(false);
@@ -64,8 +48,6 @@ const AddProducts: React.FC = () => {
   const [globalMRP, setGlobalMRP] = useState<number>(0);
   const [globalDiscount, setGlobalDiscount] = useState<number>(0);
   const [store, setStore] = useState<Store | null>(null);
-  const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
-  const [cuisineDropdownOpen, setCuisineDropdownOpen] = useState(false);
 
   const defaultVariations = ["Half", "Full", "Small", "Medium", "Large"];
   const bakeryVariations = ["1 Pound", "1.2 Pound"];
@@ -99,7 +81,6 @@ const AddProducts: React.FC = () => {
     }));
   };
 
-  // Always round up final price
   const getFinalPrice = (mrp: number, discount: number) => {
     const discounted = mrp - (mrp * discount) / 100;
     return Math.ceil(discounted);
@@ -137,15 +118,13 @@ const AddProducts: React.FC = () => {
       await createProductMutation.mutateAsync({
         name: productName,
         image: productImage,
-        cuisine: cuisine.heading, // store the heading of cuisine
+        cuisine: cuisine.heading,
         productCategory: productType,
         storeCategory: store.category,
         storeId: store.storeId,
         type: foodType === "veg" ? "Veg" : "Non Veg",
         variations: variationsObj,
       });
-
-    
 
       toast.success("Product created successfully!");
       setProductName("");
@@ -179,57 +158,28 @@ const AddProducts: React.FC = () => {
 
         <ScrollArea className="max-h-[80vh] pr-2">
           <div className="grid gap-4 py-4">
-            {/* Store Combobox */}
+
+            {/* Store Select */}
             <div className="flex flex-col gap-2">
               <Label>Store</Label>
-              <Popover
-                open={storeDropdownOpen}
-                onOpenChange={setStoreDropdownOpen}
+              <Select
+                value={store?.storeId || ""}
+                onValueChange={(value) => {
+                  const selectedStore = stores.find((s) => s.storeId === value);
+                  setStore(selectedStore || null);
+                }}
               >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={storeDropdownOpen}
-                    className="w-full justify-between"
-                  >
-                    {store
-                      ? store.name
-                      : storeLoading
-                      ? "Loading..."
-                      : "Select store"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search store..." />
-                    <CommandEmpty>No store found.</CommandEmpty>
-                    <CommandGroup>
-                      {stores.map((option: Store) => (
-                        <CommandItem
-                          key={option.storeId}
-                          value={option.name}
-                          onSelect={() => {
-                            setStore(option);
-                            setStoreDropdownOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              store?.storeId === option.storeId
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {option.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                <SelectTrigger>
+                  <SelectValue placeholder={storeLoading ? "Loading..." : "Select store"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {stores.map((s) => (
+                    <SelectItem key={s.storeId} value={s.storeId}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Image Upload */}
@@ -262,57 +212,27 @@ const AddProducts: React.FC = () => {
               </Select>
             </div>
 
-            {/* Cuisine Type Combobox */}
+            {/* Cuisine Select */}
             <div className="flex flex-col gap-2">
               <Label>Cuisine Type</Label>
-              <Popover
-                open={cuisineDropdownOpen}
-                onOpenChange={setCuisineDropdownOpen}
+              <Select
+                value={cuisine?.heading || ""}
+                onValueChange={(value) => {
+                  const selectedCuisine = cuisines.find((c) => c.heading === value);
+                  setCuisine(selectedCuisine || null);
+                }}
               >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={cuisineDropdownOpen}
-                    className="w-full justify-between"
-                  >
-                    {cuisine
-                      ? cuisine.heading
-                      : cuisinesLoading
-                      ? "Loading..."
-                      : "Select cuisine"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search cuisine..." />
-                    <CommandEmpty>No cuisine found.</CommandEmpty>
-                    <CommandGroup>
-                      {cuisines.map((option: Cuisine) => (
-                        <CommandItem
-                          key={option.heading}
-                          value={option.heading}
-                          onSelect={() => {
-                            setCuisine(option);
-                            setCuisineDropdownOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              cuisine?.heading === option.heading
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {option.heading}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                <SelectTrigger>
+                  <SelectValue placeholder={cuisinesLoading ? "Loading..." : "Select cuisine"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {cuisines.map((c) => (
+                    <SelectItem key={c.heading} value={c.heading}>
+                      {c.heading}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Food Type */}

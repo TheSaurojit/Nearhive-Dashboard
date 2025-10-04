@@ -212,3 +212,8 @@ p {
   font-weight: revert;
   /* margin: revert; */
 }
+
+.radix-select-content, .radix-popover-content {
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+}
