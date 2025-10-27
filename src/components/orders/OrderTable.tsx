@@ -127,31 +127,27 @@ export function DataTableDemo() {
   }, [usersData]);
 
   const formattedOrders = React.useMemo(() => {
-    
     return ordersData.map((order: Order) => {
       const product = order.products?.[0] || {
         name: "-",
         variant: "-",
         quantity: 1,
         price: 0,
-     temp: order.totalAmount < 100 ? "Free" : "-",
-
-
+        temp: order.totalAmount < 100 ? "Free" : "-",
       };
 
       const statusPriority: (keyof typeof order.status)[] = [
-  "cancelled",
-  "delivered",
-  "delivering",
-  "assigned",
-  "prepared",
-  "accepted",
-  "ordered",
-];
+        "cancelled",
+        "delivered",
+        "delivering",
+        "assigned",
+        "prepared",
+        "accepted",
+        "ordered",
+      ];
 
-const latestStatusKey =
-  statusPriority.find((key) => order.status?.[key]) || "-";
-
+      const latestStatusKey =
+        statusPriority.find((key) => order.status?.[key]) || "-";
 
       const orderDate = toDate(order.orderAt);
 
@@ -189,7 +185,7 @@ const latestStatusKey =
         !isNaN(storeLong)
       ) {
         const d = getDistanceFromLatLon(
-          { lat1: customerLong, lon1: customerLat },
+          { lat1: customerLat, lon1: customerLong },
           {
             lat2: storeLat,
             lon2: storeLong,
@@ -212,13 +208,13 @@ const latestStatusKey =
         store: order.storename || order.storeId,
         customer: order.customerDetails?.name || "-",
         status: latestStatusKey || "-",
-        middleman : order.providedMiddlemen?.name || 'N/A',
+        middleman: order.providedMiddlemen?.name || "N/A",
         payment: order.paymentMethod || "-",
         total: order.totalAmount || 0,
         platformFee: order.platformFee || 0,
         deliveryFee: order.deliveryFee || 0,
-        storeCommission: order.commission || 0,
-       temp: order.isCampaign ? "Free" : "-",
+        storeCommission: order.products.reduce((acc , product) => acc + product.commission, 0),
+        temp: order.isCampaign ? "Free" : "-",
         distance,
         orderRaw: order,
         userRaw: user,
@@ -242,21 +238,24 @@ const latestStatusKey =
     });
   }, [formattedOrders, selectedDate, debouncedSearch]);
   // ✅ Total orders already available from filteredData.length
-// ✅ Calculate totals
-const totalOrders = filteredData.length;
-const deliveredOrders = filteredData.filter(o => o.status === "delivered").length;
-const cancelledOrders = filteredData.filter(o => o.status === "cancelled").length;
+  // ✅ Calculate totals
+  const totalOrders = filteredData.length;
+  const deliveredOrders = filteredData.filter(
+    (o) => o.status === "delivered"
+  ).length;
+  const cancelledOrders = filteredData.filter(
+    (o) => o.status === "cancelled"
+  ).length;
 
-// ✅ Count orders per date
-const ordersPerDate = React.useMemo(() => {
-  const counts: Record<string, number> = {};
-  filteredData.forEach((order) => {
-    const dateKey = format(toDate(order.ordered), "yyyy-MM-dd");
-    counts[dateKey] = (counts[dateKey] || 0) + 1;
-  });
-  return counts;
-}, [filteredData]);
-
+  // ✅ Count orders per date
+  const ordersPerDate = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredData.forEach((order) => {
+      const dateKey = format(toDate(order.ordered), "yyyy-MM-dd");
+      counts[dateKey] = (counts[dateKey] || 0) + 1;
+    });
+    return counts;
+  }, [filteredData]);
 
   const columns: ColumnDef<any>[] = [
     { accessorKey: "id", header: "Order ID" },
@@ -275,18 +274,20 @@ const ordersPerDate = React.useMemo(() => {
     { accessorKey: "middleman", header: "Middleman" },
 
     {
-  accessorKey: "status",
-  header: "Status",
-  cell: ({ row }) => {
-    const status = row.getValue("status") as string;
-    let colorClass = "";
-    if (status === "delivered") colorClass = "text-green-600 font-semibold";
-    else if (status === "cancelled") colorClass = "text-red-600 font-semibold";
-    else if (status === "delivering") colorClass = "text-yellow-600 font-semibold";
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        let colorClass = "";
+        if (status === "delivered") colorClass = "text-green-600 font-semibold";
+        else if (status === "cancelled")
+          colorClass = "text-red-600 font-semibold";
+        else if (status === "delivering")
+          colorClass = "text-yellow-600 font-semibold";
 
-    return <div className={cn("capitalize", colorClass)}>{status}</div>;
-  },
-},
+        return <div className={cn("capitalize", colorClass)}>{status}</div>;
+      },
+    },
 
     { accessorKey: "payment", header: "Payment" },
     {
@@ -296,16 +297,15 @@ const ordersPerDate = React.useMemo(() => {
         <div className="text-right font-medium">₹{row.getValue("total")}</div>
       ),
     },
-{
-  accessorKey: "temp",
-  header: "isFree",
-  cell: ({ row }) => (
-    <div className="text-center font-semibold text-green-600">
-      {row.getValue("temp")}
-    </div>
-  ),
-},
-
+    {
+      accessorKey: "temp",
+      header: "isFree",
+      cell: ({ row }) => (
+        <div className="text-center font-semibold text-green-600">
+          {row.getValue("temp")}
+        </div>
+      ),
+    },
 
     {
       id: "actions",
@@ -415,19 +415,18 @@ const ordersPerDate = React.useMemo(() => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-{/* ✅ Order Count Summary */}
-<div className="mb-4 flex flex-wrap gap-4 ml-2">
-  <p className="text-sm font-medium">
-    Total Orders: <span className="font-bold">{totalOrders}</span>
-  </p>
-  <p className="text-sm font-medium">
-    Delivered: <span className="font-bold">{deliveredOrders}</span>
-  </p>
-  <p className="text-sm font-medium">
-    Cancelled: <span className="font-bold">{cancelledOrders}</span>
-  </p>
-</div>
-
+      {/* ✅ Order Count Summary */}
+      <div className="mb-4 flex flex-wrap gap-4 ml-2">
+        <p className="text-sm font-medium">
+          Total Orders: <span className="font-bold">{totalOrders}</span>
+        </p>
+        <p className="text-sm font-medium">
+          Delivered: <span className="font-bold">{deliveredOrders}</span>
+        </p>
+        <p className="text-sm font-medium">
+          Cancelled: <span className="font-bold">{cancelledOrders}</span>
+        </p>
+      </div>
 
       {/* Table */}
       <div className="rounded-md border">
@@ -575,14 +574,14 @@ const ordersPerDate = React.useMemo(() => {
                 <p>
                   <strong>Total Amount:</strong> ₹{selectedOrder.totalAmount}
                 </p>
+
                 <p>
-                  <strong>Store Commission:</strong> ₹{selectedOrder.commission}
+                  <strong>Store Commission:</strong> ₹{selectedOrder.products.reduce((acc , product) => acc + (product.commission || 0 ) , 0)}
                 </p>
               </div>
 
               <div>
                 <h3 className="font-semibold mb-2">Order Timeline</h3>
-   
 
                 {Object.entries(selectedOrder.status || {}).map(
                   ([key, value]) => (
@@ -597,7 +596,7 @@ const ordersPerDate = React.useMemo(() => {
 
               <div>
                 <h3 className="font-semibold mb-2">Other Info</h3>
-               
+
                 <p>
                   <strong>User ID:</strong> {selectedOrder.userId}
                 </p>

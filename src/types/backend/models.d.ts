@@ -104,7 +104,6 @@ type OrderStatusStep = {
 
 export type Order = {
   id: string;
-  commission: number;
   isCampaign:boolean;
   couponCode: string;
   couponDiscount: number;
@@ -148,6 +147,8 @@ export type Order = {
     productId: string;
     quantity: number;
     variant: string;
+  commission: number;
+
   }[];
   status: {
     cancelled?: OrderStatusStep;
